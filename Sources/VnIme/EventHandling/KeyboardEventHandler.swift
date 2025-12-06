@@ -290,7 +290,10 @@ public final class KeyboardEventHandler: KeyboardEventHandling, @unchecked Senda
         hasJustUsedHotkey = lastFlags.rawValue != 0
 
         // Check for other control keys (Cmd, Ctrl, Option pressed)
+        // When modifier keys are used (e.g., Cmd+A, Cmd+C), the screen content may change
+        // in ways we can't track, so reset the engine to stay in sync (following OpenKey's approach)
         if hasOtherControlKey(event.flags) {
+            engine.reset()
             return event
         }
 

@@ -479,8 +479,8 @@ final class EngineTests: XCTestCase {
 
         // Buffer should be empty after removing the only character
         XCTAssertTrue(engine.isEmpty)
-        // Result should handle the backspace properly
-        XCTAssertTrue(result == .passThrough || result == .replace(backspaceCount: 1, replacement: ""))
+        // Backspace ALWAYS passes through - engine only manages internal state
+        XCTAssertEqual(result, .passThrough)
     }
 
     func testMultipleBackspaces() {
@@ -490,14 +490,49 @@ final class EngineTests: XCTestCase {
         _ = engine.processKey(keyCode: 0, character: "c", modifiers: 0)
         XCTAssertEqual(engine.currentText, "abc")
 
-        _ = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        var result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough)
         XCTAssertEqual(engine.currentText, "ab")
 
-        _ = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough)
         XCTAssertEqual(engine.currentText, "a")
 
-        _ = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough)
         XCTAssertTrue(engine.isEmpty)
+    }
+
+    func testBackspaceOnEmptyBufferNoOutput() {
+        // Backspace on empty buffer should pass through without producing any text
+        let result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough)
+        XCTAssertTrue(engine.isEmpty)
+    }
+
+    func testRepeatedBackspaceOnEmptyBuffer() {
+        // Multiple backspaces on empty buffer should all pass through
+        // This tests the bug fix: no duplicate characters should appear
+        for _ in 0..<5 {
+            let result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+            XCTAssertEqual(result, .passThrough)
+            XCTAssertTrue(engine.isEmpty)
+        }
+    }
+
+    func testBackspaceAfterVietnameseWord() {
+        // Type "việt" then backspace should preserve remaining tone
+        _ = engine.processKey(keyCode: 0, character: "v", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "i", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "e", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "e", modifiers: 0) // ê
+        _ = engine.processKey(keyCode: 0, character: "j", modifiers: 0) // ệ
+        _ = engine.processKey(keyCode: 0, character: "t", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "việt")
+
+        let result = engine.processKey(keyCode: 51, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough)
+        XCTAssertEqual(engine.currentText, "việ")
     }
 
     // MARK: - Stroke Modifier Tests
@@ -609,12 +644,13 @@ final class EngineTests: XCTestCase {
 
     func testUndoResetAfterWordBreak() {
         // After word break, undo state should reset
-        // "aaaa " + "aa" → "aaa aa" (not "aaa â") - tempDisableKey resets after word break
+        // "aaaa " + "aa" → "aaaa â" - tempDisableKey resets after word break
         // The first "aaaa" produces "aaa" (circumflex + undo + tempDisabled literal)
+        // But at word break, "aaa" is invalid Vietnamese, so restore-on-invalid outputs "aaaa"
         // The space resets tempDisableKey
         // The next "aa" produces "â" (circumflex works again after reset)
         let result = engine.processString("aaaa aa")
-        XCTAssertEqual(result, "aaa â", "tempDisableKey should reset after word break, allowing transformation in new word")
+        XCTAssertEqual(result, "aaaa â", "tempDisableKey should reset after word break, allowing transformation in new word")
     }
 
     // MARK: - Bracket Key Integration Tests

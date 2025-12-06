@@ -131,7 +131,7 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
         // Handle word break
         if VietnameseConstants.isWordBreak(char) {
-            return handleWordBreak()
+            return handleWordBreak(wordBreakChar: char)
         }
 
         // Process the character through input method
@@ -301,12 +301,21 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     /// Apply undo: restore original characters
     /// The originalChars already includes the key sequence (e.g., "aa" for circumflex undo)
     private func applyUndo(originalChars: String, triggerKey: Character) {
-        // Clear current buffer
+        // Save original keystrokes before clearing (they were recorded in processCharacter)
+        // This preserves the full keystroke history for restore-on-invalid feature
+        let savedKeystrokes = buffer.allOriginalKeys
+
+        // Clear current buffer (this also clears keyStates)
         buffer.clear()
 
         // Restore original characters (already includes the key sequence)
         for char in originalChars {
             buffer.append(char)
+        }
+
+        // Restore the saved keystrokes so restore-on-invalid works correctly
+        for key in savedKeystrokes {
+            buffer.recordOriginalKey(key)
         }
         // Note: We do NOT add triggerKey again - originalChars already has the complete sequence
     }
@@ -524,48 +533,42 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     // MARK: - Backspace Handling
 
+    /// Handles backspace key following OpenKey's proven approach:
+    /// - Engine only updates internal state (buffer tracking)
+    /// - Backspace ALWAYS passes through to let the system handle deletion
+    /// - No text injection during backspace - simple and fast
     private func handleBackspace() -> EngineResult {
         if buffer.isEmpty {
-            // Try to restore from history
-            if restoreFromHistory() {
-                let newOutput = buffer.toUnicodeString()
-                previousOutputLength = newOutput.count
-                return .replace(backspaceCount: 1, replacement: newOutput)
-            }
+            // Buffer already empty - just pass through
+            // Do NOT restore from history here - that would create buffer/screen mismatch
+            // History restoration is only for explicit "undo" action (Ctrl+Z), not backspace
             return .passThrough
         }
 
-        let oldLength = previousOutputLength
-
-        // Save current state before removing (for potential undo)
+        // Save current state before removing (for potential undo via Ctrl+Z)
         saveToHistory()
 
+        // Update internal buffer
         _ = buffer.removeLast()
 
-        // If buffer is now empty, we need to delete all previous output
+        // Update output length tracking (NFC = 1 char per visual char)
+        previousOutputLength = max(0, previousOutputLength - 1)
+
         if buffer.isEmpty {
+            // Buffer is now empty - reset all state for new word
             previousOutputLength = 0
-            // If we had output, delete it all (minus 1 because passThrough will send 1 backspace)
-            if oldLength > 1 {
-                // Need to send additional backspaces to clear the whole transformed output
-                return .replace(backspaceCount: oldLength, replacement: "")
-            }
-            // Single character or no previous output - just pass through
-            return .passThrough
+            inputMethodState.reset()
+            tempDisableTransformation = false
+            tempOffSpellChecking = false
+        } else {
+            // Refresh tone position and check spelling on remaining buffer
+            _ = buffer.refreshTonePosition()
+            checkSpellingAfterChange()
         }
 
-        // Refresh tone position after deletion
-        _ = buffer.refreshTonePosition()
-
-        // Otherwise we need to regenerate the output
-        let newOutput = buffer.toUnicodeString()
-        let newLength = newOutput.count
-
-        // Calculate how many backspaces we need
-        // We need to delete the old output and replace with new
-        previousOutputLength = newLength
-
-        return .replace(backspaceCount: oldLength, replacement: newOutput)
+        // ALWAYS pass through - let system handle the deletion
+        // Key insight from OpenKey: never output text on backspace
+        return .passThrough
     }
 
     // MARK: - State History Management
@@ -601,9 +604,9 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     // MARK: - Word Break Handling
 
-    private func handleWordBreak() -> EngineResult {
+    private func handleWordBreak(wordBreakChar: Character) -> EngineResult {
         // Check for restore-on-invalid at word boundary
-        if let restoreResult = checkRestoreIfWrongSpelling() {
+        if let restoreResult = checkRestoreIfWrongSpelling(wordBreakChar: wordBreakChar) {
             // Clear state after restore
             buffer.clear()
             previousOutputLength = 0
@@ -627,8 +630,9 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     /// Check if spelling is wrong and restore original keystrokes if enabled.
     /// Called at word boundary (space, punctuation).
+    /// - Parameter wordBreakChar: The word break character (space, punctuation) to append after restoration
     /// - Returns: EngineResult if restoration occurred, nil otherwise
-    private func checkRestoreIfWrongSpelling() -> EngineResult? {
+    private func checkRestoreIfWrongSpelling(wordBreakChar: Character) -> EngineResult? {
         // Skip if feature is disabled or spell checking is off/bypassed
         guard restoreIfWrongSpelling,
               spellCheckEnabled,
@@ -649,9 +653,10 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
             return nil
         }
 
-        // Restore: delete transformed text and output original keystrokes
+        // Restore: delete transformed text and output original keystrokes + word break char
         let backspaceCount = previousOutputLength
-        return .replace(backspaceCount: backspaceCount, replacement: originalKeys)
+        let replacement = originalKeys + String(wordBreakChar)
+        return .replace(backspaceCount: backspaceCount, replacement: replacement)
     }
 
     // MARK: - Result Generation
