@@ -1,8 +1,5 @@
-# event-handling Specification
+## MODIFIED Requirements
 
-## Purpose
-Defines the keyboard event handling system using CGEventTap for system-wide keyboard interception, text injection, hotkey handling, and application compatibility.
-## Requirements
 ### Requirement: Keyboard Event Interception
 
 The system SHALL intercept keyboard events system-wide using macOS CGEventTap.
@@ -175,6 +172,8 @@ The system SHALL support different keyboard layouts.
 
 ---
 
+## ADDED Requirements
+
 ### Requirement: Text Injector Component
 
 The system SHALL provide a dedicated component for text injection with application-aware behavior.
@@ -235,4 +234,3 @@ The system SHALL track modifier key states for proper processing.
 - **WHEN** modifier key state changes
 - **THEN** event is processed for hotkey detection
 - **AND** temporary disable states are updated
-

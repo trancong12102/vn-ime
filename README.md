@@ -15,6 +15,19 @@ Bộ gõ tiếng Việt cho macOS, được viết lại hoàn toàn bằng Swif
 - macOS 13.0 (Ventura) trở lên
 - Quyền truy cập Accessibility (System Settings → Privacy & Security → Accessibility)
 
+## Thiết lập quyền Accessibility
+
+VnIme cần quyền Accessibility để hoạt động. Khi chạy lần đầu:
+
+1. VnIme sẽ hiển thị dialog yêu cầu quyền
+2. Click **"Open System Settings"**
+3. Trong System Settings → Privacy & Security → Accessibility:
+   - Tìm VnIme trong danh sách
+   - Bật toggle để cấp quyền
+4. Quay lại VnIme, click **"Check Permission Status"** hoặc **"Continue"**
+
+> **Lưu ý**: Nếu VnIme không xuất hiện trong danh sách, hãy thử kéo ứng dụng VnIme vào list hoặc restart ứng dụng.
+
 ## Cài đặt
 
 ### Từ source
@@ -44,7 +57,33 @@ Tải xuống file `.dmg` từ [Releases](https://github.com/trancong12102/vn-im
 
 ### Phím tắt
 
-- `Ctrl + Space`: Chuyển đổi ngôn ngữ (mặc định)
+| Phím tắt | Chức năng |
+|----------|-----------|
+| `Ctrl + Space` | Chuyển đổi Tiếng Việt / Tiếng Anh |
+| `Command` (giữ) | Tạm tắt bộ gõ (dùng cho shortcuts) |
+| `Control` (giữ) | Tạm tắt kiểm tra chính tả |
+
+> **Mẹo**: Giữ Command khi gõ shortcuts (Cmd+C, Cmd+V) để tránh VnIme xử lý sai.
+
+### Ứng dụng được hỗ trợ
+
+VnIme hoạt động với hầu hết các ứng dụng macOS. Một số ứng dụng có workaround đặc biệt:
+
+| Ứng dụng | Ghi chú |
+|----------|---------|
+| Safari, Notes, TextEdit | Hỗ trợ đầy đủ (Unicode Compound) |
+| Chrome, Edge, Brave | Workaround cho địa chỉ bar |
+| Sublime Text | Sử dụng ZWNJ thay vì NNBSP |
+| Terminal, iTerm2 | Hoạt động bình thường |
+| VSCode | Hoạt động bình thường |
+
+### Tương thích bàn phím
+
+VnIme hỗ trợ các layout bàn phím không phải QWERTY (Dvorak, Colemak, v.v.) thông qua tùy chọn **Layout Compatibility** trong Settings.
+
+### Tương thích với IME khác
+
+VnIme tự động bypass khi phát hiện IME tiếng Nhật, Trung, Hàn đang hoạt động để tránh xung đột.
 
 ### Kiểu gõ Telex
 
