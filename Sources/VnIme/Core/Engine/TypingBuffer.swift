@@ -15,6 +15,10 @@ public struct TypingBuffer: Sendable {
     /// (used to calculate backspace count)
     private var outputCount: Int = 0
 
+    /// KeyStates buffer - stores original keystrokes before any transformation.
+    /// Used for restore-on-invalid feature (matches OpenKey's KeyStates[MAX_BUFF]).
+    private var keyStates: [Character] = []
+
     // MARK: - Initialization
 
     public init() {}
@@ -56,16 +60,40 @@ public struct TypingBuffer: Sendable {
         append(TypedCharacter(character: char))
     }
 
+    /// Add a character to the buffer and record original keystroke
+    /// - Parameters:
+    ///   - char: The TypedCharacter to add
+    ///   - originalKey: The original key pressed (for restore-on-invalid)
+    /// - Returns: true if successful, false if buffer is full
+    @discardableResult
+    public mutating func append(_ char: TypedCharacter, originalKey: Character) -> Bool {
+        guard !isFull else { return false }
+        characters.append(char)
+        keyStates.append(originalKey)
+        return true
+    }
+
+    /// Record an original keystroke without adding a character (for transformation keys)
+    public mutating func recordOriginalKey(_ key: Character) {
+        guard keyStates.count < Self.maxCapacity else { return }
+        keyStates.append(key)
+    }
+
     /// Remove and return the last character
     @discardableResult
     public mutating func removeLast() -> TypedCharacter? {
         guard !isEmpty else { return nil }
+        // Also remove from keyStates if present
+        if !keyStates.isEmpty {
+            keyStates.removeLast()
+        }
         return characters.removeLast()
     }
 
     /// Clear the buffer
     public mutating func clear() {
         characters.removeAll()
+        keyStates.removeAll()
         outputCount = 0
     }
 
@@ -490,6 +518,29 @@ public struct TypingBuffer: Sendable {
     /// Reset output tracking (after word break)
     public mutating func resetOutputTracking() {
         outputCount = 0
+    }
+
+    // MARK: - KeyStates (Original Input Tracking)
+
+    /// Get the original keystrokes (before any transformation)
+    /// Used for restore-on-invalid feature
+    public var originalKeystrokes: String {
+        String(keyStates)
+    }
+
+    /// Number of original keystrokes recorded
+    public var keystrokeCount: Int {
+        keyStates.count
+    }
+
+    /// Check if we have original keystrokes to restore
+    public var hasOriginalKeystrokes: Bool {
+        !keyStates.isEmpty
+    }
+
+    /// Get the original keystrokes as array
+    public var allOriginalKeys: [Character] {
+        keyStates
     }
 }
 

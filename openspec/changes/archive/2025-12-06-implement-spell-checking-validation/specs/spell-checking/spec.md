@@ -1,8 +1,5 @@
-# spell-checking Specification
+## MODIFIED Requirements
 
-## Purpose
-Defines the spell checking system that validates Vietnamese syllables, consonant clusters, vowel combinations, and end consonants to ensure correct word formation.
-## Requirements
 ### Requirement: Vietnamese Spell Checking
 
 The system SHALL validate Vietnamese word spelling when spell checking is enabled.
@@ -110,26 +107,7 @@ The system SHALL validate ending consonant combinations.
 
 ---
 
-### Requirement: Invalid Word Handling
-
-The system SHALL handle invalid spelling according to user preference.
-
-#### Scenario: Restore invalid word
-- **WHEN** spell checking is enabled
-- **AND** restore-on-invalid is enabled
-- **AND** word spelling is invalid
-- **THEN** original unprocessed input is restored
-
-#### Scenario: Keep invalid word
-- **WHEN** spell checking is enabled
-- **AND** restore-on-invalid is disabled
-- **AND** word spelling is invalid
-- **THEN** processed text is kept despite invalid spelling
-
-#### Scenario: Temporary spelling disable
-- **WHEN** user triggers temporary spelling disable (e.g., Ctrl key)
-- **THEN** spelling check is bypassed for current word
-- **AND** re-enabled for next word
+## ADDED Requirements
 
 ### Requirement: Syllable Structure Parsing
 
@@ -299,4 +277,3 @@ The system SHALL validate that initial consonants can combine with given vowels.
 - **GIVEN** no initial consonant
 - **AND** vowel "anh"
 - **THEN** validation passes (vowel-initial words allowed)
-

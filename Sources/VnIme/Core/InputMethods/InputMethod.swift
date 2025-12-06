@@ -64,7 +64,7 @@ public struct InputTransformation: Sendable {
 }
 
 /// Vietnamese tone marks
-public enum ToneMark: Sendable {
+public enum ToneMark: Sendable, Equatable {
     case acute      // sắc (á)
     case grave      // huyền (à)
     case hook       // hỏi (ả)

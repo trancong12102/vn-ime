@@ -53,6 +53,15 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     private var _characterTable: any CharacterTable
     public var spellCheckEnabled: Bool = true
 
+    /// Enable restore-on-invalid feature (restore original keystrokes when spelling is invalid)
+    public var restoreIfWrongSpelling: Bool = true
+
+    /// Temporary disable spell checking (e.g., when Control key is held)
+    public var tempOffSpellChecking: Bool = false
+
+    /// Flag to temporarily disable transformation (set when current word is invalid)
+    private var tempDisableTransformation: Bool = false
+
     /// The typing buffer holding current word
     private var buffer: TypingBuffer = TypingBuffer()
 
@@ -68,6 +77,9 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     /// Quick Telex handler for consonant shortcuts (cc=ch, gg=gi, etc.)
     public var quickTelex: QuickTelex = QuickTelex()
+
+    /// Spell checker instance
+    private let spellChecker: SpellChecker = DefaultSpellChecker()
 
     public var inputMethod: any InputMethod { _inputMethod }
     public var characterTable: any CharacterTable { _characterTable }
@@ -89,9 +101,17 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     public func processKey(keyCode: UInt16, character: Character?, modifiers: UInt64) -> EngineResult {
         // Handle modifier keys (Cmd, Ctrl, etc.) - pass through
-        if modifiers & 0x100108 != 0 { // Cmd or Ctrl
+        // Cmd = 0x100000, Ctrl = 0x40000
+        let cmdMask: UInt64 = 0x100000
+        let ctrlMask: UInt64 = 0x40000
+
+        if modifiers & cmdMask != 0 {
             return .passThrough
         }
+
+        // Control key temporarily disables spell checking
+        let controlPressed = (modifiers & ctrlMask) != 0
+        tempOffSpellChecking = controlPressed
 
         // Handle backspace
         if keyCode == TypedCharacter.backspaceKeyCode {
@@ -121,6 +141,14 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     // MARK: - Character Processing
 
     private func processCharacter(_ char: Character) -> EngineResult {
+        // Record original keystroke for restore-on-invalid feature
+        buffer.recordOriginalKey(char)
+
+        // If transformation is temporarily disabled due to invalid spelling, just add as literal
+        if tempDisableTransformation {
+            return addCharacterToBufferLiteral(char)
+        }
+
         // 1. Check Quick Telex first (before input method)
         if quickTelex.isEnabled,
            let lastChar = buffer.last?.baseCharacter,
@@ -154,13 +182,55 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
                 )
             }
 
+            // After transformation, check spell validity
+            checkSpellingAfterChange()
+
             return result
         }
 
         // No transformation - just add character to buffer
         // Clear last transformation since this is a new character
         inputMethodState.lastTransformation = nil
-        return addCharacterToBuffer(char)
+        let result = addCharacterToBuffer(char)
+
+        // Check spelling after adding character
+        checkSpellingAfterChange()
+
+        return result
+    }
+
+    /// Add character to buffer as literal (no transformation, used when tempDisable is active)
+    private func addCharacterToBufferLiteral(_ char: Character) -> EngineResult {
+        let oldLength = buffer.toUnicodeString().count
+
+        buffer.append(char)
+
+        return generateResult(previousLength: oldLength)
+    }
+
+    /// Check spelling after any change and update tempDisableTransformation flag
+    private func checkSpellingAfterChange() {
+        // Skip if spell checking is disabled or temporarily off
+        guard spellCheckEnabled && !tempOffSpellChecking else {
+            tempDisableTransformation = false
+            return
+        }
+
+        let currentText = buffer.toUnicodeString()
+        guard !currentText.isEmpty else {
+            tempDisableTransformation = false
+            return
+        }
+
+        let result = spellChecker.check(currentText)
+        switch result {
+        case .valid, .unknown:
+            // Valid or incomplete - allow transformation
+            tempDisableTransformation = false
+        case .invalid(_):
+            // Invalid spelling - disable further transformations
+            tempDisableTransformation = true
+        }
     }
 
     /// Apply Quick Telex expansion (e.g., cc → ch, gg → gi)
@@ -532,6 +602,16 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     // MARK: - Word Break Handling
 
     private func handleWordBreak() -> EngineResult {
+        // Check for restore-on-invalid at word boundary
+        if let restoreResult = checkRestoreIfWrongSpelling() {
+            // Clear state after restore
+            buffer.clear()
+            previousOutputLength = 0
+            inputMethodState.reset()
+            tempDisableTransformation = false
+            return restoreResult
+        }
+
         // Save current word to history before clearing
         if !buffer.isEmpty {
             saveToHistory()
@@ -541,7 +621,37 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
         buffer.clear()
         previousOutputLength = 0
         inputMethodState.reset()
+        tempDisableTransformation = false
         return .passThrough
+    }
+
+    /// Check if spelling is wrong and restore original keystrokes if enabled.
+    /// Called at word boundary (space, punctuation).
+    /// - Returns: EngineResult if restoration occurred, nil otherwise
+    private func checkRestoreIfWrongSpelling() -> EngineResult? {
+        // Skip if feature is disabled or spell checking is off/bypassed
+        guard restoreIfWrongSpelling,
+              spellCheckEnabled,
+              !tempOffSpellChecking else {
+            return nil
+        }
+
+        // Need both transformed text and original keystrokes
+        let currentText = buffer.toUnicodeString()
+        let originalKeys = buffer.originalKeystrokes
+        guard !currentText.isEmpty, !originalKeys.isEmpty else {
+            return nil
+        }
+
+        // Only restore if current spelling is invalid
+        let result = spellChecker.check(currentText)
+        guard case .invalid(_) = result else {
+            return nil
+        }
+
+        // Restore: delete transformed text and output original keystrokes
+        let backspaceCount = previousOutputLength
+        return .replace(backspaceCount: backspaceCount, replacement: originalKeys)
     }
 
     // MARK: - Result Generation
@@ -576,6 +686,8 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
         previousOutputLength = 0
         clearHistory()
         inputMethodState.reset()
+        tempDisableTransformation = false
+        tempOffSpellChecking = false
     }
 
     public func setInputMethod(_ method: any InputMethod) {
