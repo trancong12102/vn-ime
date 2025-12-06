@@ -1,10 +1,10 @@
 import Foundation
 
 /// Result of processing a keyboard event
-public enum EngineResult: Sendable {
+public enum EngineResult: Sendable, Equatable {
     /// No action needed, pass through the original key
     case passThrough
-    /// Suppress the key, engine handled it
+    /// Suppress the key, engine handled it internally
     case suppress
     /// Replace with new characters (backspace count, new string)
     case replace(backspaceCount: Int, replacement: String)
@@ -37,30 +37,406 @@ public protocol VietnameseEngine: Sendable {
 
     /// Enable or disable spell checking
     var spellCheckEnabled: Bool { get set }
+
+    /// Get the current buffer content as Unicode string
+    var currentText: String { get }
+
+    /// Check if the buffer is empty
+    var isEmpty: Bool { get }
 }
 
-/// Default implementation placeholder
+/// Default implementation of Vietnamese input processing engine
 public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendable {
+    // MARK: - Properties
+
     private var _inputMethod: any InputMethod
     private var _characterTable: any CharacterTable
     public var spellCheckEnabled: Bool = true
 
+    /// The typing buffer holding current word
+    private var buffer: TypingBuffer = TypingBuffer()
+
+    /// Track previous output length for backspace calculation
+    private var previousOutputLength: Int = 0
+
+    /// State history for undo/restore functionality (like OpenKey's _typingStates)
+    private var stateHistory: [[TypedCharacter]] = []
+    private let maxHistorySize = 10
+
     public var inputMethod: any InputMethod { _inputMethod }
     public var characterTable: any CharacterTable { _characterTable }
 
-    public init(inputMethod: any InputMethod = TelexInputMethod(),
-                characterTable: any CharacterTable = UnicodeCharacterTable()) {
+    public var currentText: String { buffer.toUnicodeString() }
+    public var isEmpty: Bool { buffer.isEmpty }
+
+    // MARK: - Initialization
+
+    public init(
+        inputMethod: any InputMethod = TelexInputMethod(),
+        characterTable: any CharacterTable = UnicodeCharacterTable()
+    ) {
         self._inputMethod = inputMethod
         self._characterTable = characterTable
     }
 
+    // MARK: - Main Processing
+
     public func processKey(keyCode: UInt16, character: Character?, modifiers: UInt64) -> EngineResult {
-        // TODO: Implement Vietnamese input processing
+        // Handle modifier keys (Cmd, Ctrl, etc.) - pass through
+        if modifiers & 0x100108 != 0 { // Cmd or Ctrl
+            return .passThrough
+        }
+
+        // Handle backspace
+        if keyCode == TypedCharacter.backspaceKeyCode {
+            return handleBackspace()
+        }
+
+        // Need a character to process
+        guard let char = character else {
+            return .passThrough
+        }
+
+        // Handle word break
+        if VietnameseConstants.isWordBreak(char) {
+            return handleWordBreak()
+        }
+
+        // Process the character through input method
+        return processCharacter(char)
+    }
+
+    // MARK: - Character Processing
+
+    private func processCharacter(_ char: Character) -> EngineResult {
+        // Get context string for input method
+        let context = buffer.toUnicodeString()
+
+        // Check if input method has a transformation
+        if let transformation = _inputMethod.processCharacter(char, context: context) {
+            return applyTransformation(transformation, originalChar: char)
+        }
+
+        // No transformation - just add character to buffer
+        return addCharacterToBuffer(char)
+    }
+
+    private func applyTransformation(_ transformation: InputTransformation, originalChar: Character) -> EngineResult {
+        let oldOutput = buffer.toUnicodeString()
+        let oldLength = oldOutput.count
+
+        var wasTransformed = false
+
+        switch transformation.type {
+        case .tone(let toneMark):
+            wasTransformed = applyToneMark(toneMark, originalChar: originalChar)
+
+        case .modifier(let modifierMark):
+            wasTransformed = applyModifier(modifierMark, originalChar: originalChar)
+            // After applying modifier, check if tone needs repositioning
+            if wasTransformed {
+                _ = buffer.refreshTonePosition()
+            }
+
+        case .replace(let replacement):
+            applyReplacement(replacement)
+            wasTransformed = true
+
+        case .none:
+            // Add character as-is
+            buffer.append(originalChar)
+        }
+
+        // After any transformation, refresh tone position if needed
+        // This handles cases like typing "thuor" then adding more characters
+        if wasTransformed {
+            _ = buffer.refreshTonePosition()
+        }
+
+        return generateResult(previousLength: oldLength, wasTransformed: wasTransformed)
+    }
+
+    /// Apply tone mark to appropriate vowel
+    /// - Returns: true if mark was applied, false if character was added as literal
+    @discardableResult
+    private func applyToneMark(_ mark: ToneMark, originalChar: Character) -> Bool {
+        let state: CharacterState
+        switch mark {
+        case .acute: state = .acute
+        case .grave: state = .grave
+        case .hook: state = .hook
+        case .tilde: state = .tilde
+        case .dot: state = .dotBelow
+        case .none:
+            // Remove existing tone mark
+            if buffer.removeMark() {
+                return true
+            }
+            // No mark to remove, add character as literal
+            buffer.append(originalChar)
+            return false
+        }
+
+        // Check spell validity before applying (if enabled)
+        if spellCheckEnabled {
+            // Check if this tone would be valid with current ending consonant
+            if let ending = buffer.findEndingConsonant() {
+                if !VietnameseConstants.isValidToneWithEnding(tone: state, ending: ending.pattern) {
+                    // Invalid tone for this ending - add as literal
+                    buffer.append(originalChar)
+                    return false
+                }
+            }
+        }
+
+        if buffer.applyMark(state) {
+            return true
+        }
+
+        // No vowel to apply mark to - add character as literal
+        buffer.append(originalChar)
+        return false
+    }
+
+    /// Apply modifier mark to appropriate character
+    /// - Returns: true if modifier was applied, false if character was added as literal
+    @discardableResult
+    private func applyModifier(_ modifier: ModifierMark, originalChar: Character) -> Bool {
+        switch modifier {
+        case .circumflex:
+            // For double-letter like 'aa' -> 'â', 'ee' -> 'ê', 'oo' -> 'ô'
+            // Find the matching vowel in buffer
+            let loweredChar = originalChar.lowercased().first ?? originalChar
+            if let index = findLastVowel(matching: loweredChar) {
+                buffer.applyModifier(.circumflex, at: index)
+                return true
+            } else {
+                buffer.append(originalChar)
+                return false
+            }
+
+        case .breve:
+            // 'w' after 'a' -> 'ă'
+            if let index = findLastVowel(matching: "a") {
+                buffer.applyModifier(.hornOrBreve, at: index)
+                return true
+            } else {
+                buffer.append(originalChar)
+                return false
+            }
+
+        case .horn:
+            // 'w' after 'o' -> 'ơ', 'w' after 'u' -> 'ư'
+            // For "ươ" combination, apply horn to both u and o
+            let oIndex = findLastVowel(matching: "o")
+            let uIndex = findLastVowel(matching: "u")
+
+            // Check for "uo" pattern - apply horn to both for "ươ"
+            if let oi = oIndex, let ui = uIndex, ui == oi - 1 {
+                // "uo" pattern found - make it "ươ"
+                buffer.applyModifier(.hornOrBreve, at: ui)
+                buffer.applyModifier(.hornOrBreve, at: oi)
+                return true
+            }
+
+            // Otherwise apply to 'o' first, then 'u'
+            if let index = oIndex {
+                buffer.applyModifier(.hornOrBreve, at: index)
+                return true
+            } else if let index = uIndex {
+                buffer.applyModifier(.hornOrBreve, at: index)
+                return true
+            } else {
+                buffer.append(originalChar)
+                return false
+            }
+
+        case .stroke:
+            // 'dd' -> 'đ'
+            if let index = findLastConsonant(matching: "d") {
+                buffer[index].state.insert(.stroke)
+                return true
+            } else {
+                buffer.append(originalChar)
+                return false
+            }
+        }
+    }
+
+    /// Find last vowel matching a specific character
+    private func findLastVowel(matching char: Character) -> Int? {
+        let vowelPositions = buffer.findVowelPositions()
+        for i in vowelPositions.reversed() {
+            if buffer[i].baseCharacter == char {
+                return i
+            }
+        }
+        return nil
+    }
+
+    /// Find last vowel matching any of the given characters
+    private func findLastVowel(matchingAny chars: [Character]) -> Int? {
+        let vowelPositions = buffer.findVowelPositions()
+        for i in vowelPositions.reversed() {
+            if let base = buffer[i].baseCharacter, chars.contains(base) {
+                return i
+            }
+        }
+        return nil
+    }
+
+    /// Find last consonant matching a specific character
+    private func findLastConsonant(matching char: Character) -> Int? {
+        for i in stride(from: buffer.count - 1, through: 0, by: -1) {
+            if buffer[i].baseCharacter == char && !buffer[i].isVowel {
+                return i
+            }
+        }
+        return nil
+    }
+
+    private func applyReplacement(_ replacement: String) {
+        // Remove last character and add replacement
+        _ = buffer.removeLast()
+        for char in replacement {
+            buffer.append(char)
+        }
+    }
+
+    private func addCharacterToBuffer(_ char: Character) -> EngineResult {
+        let oldLength = buffer.toUnicodeString().count
+
+        buffer.append(char)
+
+        // After adding a character, check if tone needs repositioning
+        // This handles cases like adding ending consonant after vowel with tone
+        _ = buffer.refreshTonePosition()
+
+        return generateResult(previousLength: oldLength)
+    }
+
+    // MARK: - Backspace Handling
+
+    private func handleBackspace() -> EngineResult {
+        if buffer.isEmpty {
+            // Try to restore from history
+            if restoreFromHistory() {
+                let newOutput = buffer.toUnicodeString()
+                previousOutputLength = newOutput.count
+                return .replace(backspaceCount: 1, replacement: newOutput)
+            }
+            return .passThrough
+        }
+
+        let oldLength = previousOutputLength
+
+        // Save current state before removing (for potential undo)
+        saveToHistory()
+
+        _ = buffer.removeLast()
+
+        // If buffer is now empty, we need to delete all previous output
+        if buffer.isEmpty {
+            previousOutputLength = 0
+            // If we had output, delete it all (minus 1 because passThrough will send 1 backspace)
+            if oldLength > 1 {
+                // Need to send additional backspaces to clear the whole transformed output
+                return .replace(backspaceCount: oldLength, replacement: "")
+            }
+            // Single character or no previous output - just pass through
+            return .passThrough
+        }
+
+        // Refresh tone position after deletion
+        _ = buffer.refreshTonePosition()
+
+        // Otherwise we need to regenerate the output
+        let newOutput = buffer.toUnicodeString()
+        let newLength = newOutput.count
+
+        // Calculate how many backspaces we need
+        // We need to delete the old output and replace with new
+        previousOutputLength = newLength
+
+        return .replace(backspaceCount: oldLength, replacement: newOutput)
+    }
+
+    // MARK: - State History Management
+
+    /// Save current buffer state to history
+    private func saveToHistory() {
+        guard !buffer.isEmpty else { return }
+
+        if stateHistory.count >= maxHistorySize {
+            stateHistory.removeFirst()
+        }
+        stateHistory.append(buffer.allCharacters)
+    }
+
+    /// Restore buffer from history
+    /// - Returns: true if restored successfully
+    private func restoreFromHistory() -> Bool {
+        guard let lastState = stateHistory.popLast(), !lastState.isEmpty else {
+            return false
+        }
+
+        buffer.clear()
+        for char in lastState {
+            buffer.append(char)
+        }
+        return true
+    }
+
+    /// Clear state history
+    private func clearHistory() {
+        stateHistory.removeAll()
+    }
+
+    // MARK: - Word Break Handling
+
+    private func handleWordBreak() -> EngineResult {
+        // Save current word to history before clearing
+        if !buffer.isEmpty {
+            saveToHistory()
+        }
+
+        // Finalize current word and start new session
+        buffer.clear()
+        previousOutputLength = 0
         return .passThrough
     }
 
+    // MARK: - Result Generation
+
+    private func generateResult(previousLength: Int, wasTransformed: Bool = false) -> EngineResult {
+        let newOutput = buffer.toUnicodeString()
+        let newLength = newOutput.count
+
+        // If output changed, need to replace
+        if newLength > 0 {
+            let backspaces = previousOutputLength
+            previousOutputLength = newLength
+
+            // Only pass through if:
+            // 1. No previous output to delete (backspaces == 0)
+            // 2. Only one character was added (newLength == 1)
+            // 3. Character was NOT transformed (e.g., 'a' -> 'á' should NOT pass through)
+            if backspaces == 0 && newLength == 1 && !wasTransformed {
+                return .passThrough
+            }
+
+            return .replace(backspaceCount: backspaces, replacement: newOutput)
+        }
+
+        return .passThrough
+    }
+
+    // MARK: - State Management
+
     public func reset() {
-        // TODO: Clear buffer and state
+        buffer.clear()
+        previousOutputLength = 0
+        clearHistory()
     }
 
     public func setInputMethod(_ method: any InputMethod) {
@@ -69,5 +445,48 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     public func setCharacterTable(_ table: any CharacterTable) {
         _characterTable = table
+    }
+}
+
+// MARK: - Testing Helpers
+
+extension DefaultVietnameseEngine {
+    /// Process a string of characters (for testing)
+    public func processString(_ string: String) -> String {
+        reset()
+        var result = ""
+
+        for char in string {
+            let engineResult = processKey(
+                keyCode: 0,
+                character: char,
+                modifiers: 0
+            )
+
+            switch engineResult {
+            case .passThrough:
+                result.append(char)
+            case .suppress:
+                break
+            case .replace(let backspaces, let replacement):
+                // Remove backspaces from result
+                if backspaces > 0 && result.count >= backspaces {
+                    result.removeLast(backspaces)
+                }
+                result.append(replacement)
+            }
+        }
+
+        return result
+    }
+
+    /// Get internal buffer for testing
+    public var testBuffer: TypingBuffer {
+        buffer
+    }
+
+    /// Check if current buffer has valid Vietnamese spelling
+    public var isValidSpelling: Bool {
+        buffer.isValidVietnameseSyllable()
     }
 }

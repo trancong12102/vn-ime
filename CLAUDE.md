@@ -121,3 +121,26 @@ For complex, multi-step tasks:
 - Use git commits as checkpoints for code changes
 - Track progress in structured formats (JSON for test results, text for notes)
 </context_management>
+
+---
+
+<openkey_analysis>
+## OpenKey Analysis
+
+When analyzing OpenKey code or behavior:
+
+1. **Use both sources in parallel**:
+   - `mcp__deepwiki__ask_question` with repo `tuyenvm/OpenKey` - for high-level architecture and documentation
+   - Local code analysis in `OpenKey/` directory - for implementation details
+
+2. **Combine insights**: Cross-reference DeepWiki explanations with actual source code to ensure accuracy
+
+Example:
+```
+Task tool with prompt:
+"Analyze how OpenKey handles tone placement. Use:
+1. DeepWiki (tuyenvm/OpenKey) for architecture overview
+2. Local OpenKey/ directory for implementation details
+Return the algorithm and key code references."
+```
+</openkey_analysis>
