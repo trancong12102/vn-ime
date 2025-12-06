@@ -125,7 +125,9 @@ struct AboutView: View {
             Divider()
                 .frame(width: 200)
 
-            Link("GitHub Repository", destination: URL(string: "https://github.com/trancong12102/vn-ime")!)
+            if let url = URL(string: "https://github.com/trancong12102/vn-ime") {
+                Link("GitHub Repository", destination: url)
+            }
 
             Text("GPL-3.0 License")
                 .font(.caption)

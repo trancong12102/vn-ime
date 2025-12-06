@@ -34,7 +34,7 @@ public enum InputMethodRegistry {
     public static var allMethods: [(id: String, method: any InputMethod)] {
         [
             ("telex", telex),
-            ("simple-telex", simpleTelex)
+            ("simple-telex", simpleTelex),
         ]
     }
 
@@ -43,11 +43,6 @@ public enum InputMethodRegistry {
     /// - Returns: The input method, or nil if not found
     public static func getByName(_ name: String) -> (any InputMethod)? {
         let lower = name.lowercased()
-        for (_, method) in allMethods {
-            if method.name.lowercased() == lower {
-                return method
-            }
-        }
-        return nil
+        return allMethods.first { $0.method.name.lowercased() == lower }?.method
     }
 }

@@ -481,24 +481,17 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
     /// Find last vowel matching a specific character
     private func findLastVowel(matching char: Character) -> Int? {
-        let vowelPositions = buffer.findVowelPositions()
-        for i in vowelPositions.reversed() {
-            if buffer[i].baseCharacter == char {
-                return i
-            }
-        }
-        return nil
+        buffer.findVowelPositions().last { buffer[$0].baseCharacter == char }
     }
 
     /// Find last vowel matching any of the given characters
     private func findLastVowel(matchingAny chars: [Character]) -> Int? {
-        let vowelPositions = buffer.findVowelPositions()
-        for i in vowelPositions.reversed() {
-            if let base = buffer[i].baseCharacter, chars.contains(base) {
-                return i
+        buffer.findVowelPositions().last { index in
+            if let base = buffer[index].baseCharacter {
+                return chars.contains(base)
             }
+            return false
         }
-        return nil
     }
 
     /// Find last consonant matching a specific character

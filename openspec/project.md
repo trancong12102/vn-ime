@@ -54,17 +54,36 @@ Sources/
 - **Observer/Combine**: Settings changes propagation
 - **State Machine**: Input processing states
 
-### Testing Strategy
-- **Unit Tests**:
-  - Core engine logic (character conversion, spelling rules)
-  - Input method rules (Telex, Simple Telex transformations)
-- **Integration Tests**:
-  - Event handling pipeline
-  - Settings persistence
-- **UI Tests**:
-  - Settings panel interactions
-  - Menu bar actions
+### Testing & Quality Strategy
+
+**Build & Verify Commands**:
+```bash
+# Build
+swift build
+
+# Run tests
+swift test
+
+# Run linting
+swiftlint lint
+
+# Full verification (recommended before commit)
+swift build && swift test && swiftlint lint
+```
+
+**Test Types**:
+- **Unit Tests**: Core engine logic (character conversion, spelling rules), Input method rules
+- **Integration Tests**: Event handling pipeline, Settings persistence
+- **UI Tests**: Settings panel interactions, Menu bar actions
 - **Target Coverage**: 80%+ for core engine
+
+**SwiftLint Configuration** (`.swiftlint.yml`):
+- Mandatory trailing commas for multi-line collections
+- Force unwrapping warnings (use optional binding instead)
+- File length: 500 lines warning, 1000 error
+- Function body: 50 lines warning, 100 error
+- Cyclomatic complexity: 15 warning, 25 error
+- Test files excluded from strict rules (file_length, type_body_length, empty_string)
 
 ### Git Workflow
 - **Branch naming**: `feature/`, `fix/`, `refactor/`, `docs/`

@@ -345,12 +345,7 @@ public enum SyllableParser {
 
     /// Check if a string contains only vowels
     private static func isAllVowels(_ str: String) -> Bool {
-        for char in str {
-            if !VietnameseSpellingRules.baseVowels.contains(char) {
-                return false
-            }
-        }
-        return true
+        str.allSatisfy { VietnameseSpellingRules.baseVowels.contains($0) }
     }
 }
 
@@ -367,7 +362,7 @@ public enum VietnameseSpellingRules {
     public static let initialConsonants: Set<String> = [
         "b", "c", "ch", "d", "g", "gh", "gi", "h", "k", "kh",
         "l", "m", "n", "ng", "ngh", "nh", "p", "ph", "qu", "r",
-        "s", "t", "th", "tr", "v", "x"
+        "s", "t", "th", "tr", "v", "x",
     ]
 
     /// Valid final consonants (8 patterns from OpenKey _endConsonantTable)
@@ -404,7 +399,7 @@ public enum VietnameseSpellingRules {
         // ư-based
         "ưi", "ươu", "ươi", "uôi", "ưu",
         // y-based
-        "yêu"
+        "yêu",
     ]
 
     /// Vowel combinations that ALLOW ending consonants
@@ -417,7 +412,7 @@ public enum VietnameseSpellingRules {
         // u-based
         "ua", "ưa", "uâ", "uê", "uo", "uô", "ươ", "uy", "uyê",
         // y-based
-        "yê"
+        "yê",
     ]
 
     /// All valid vowel combinations (union of both sets plus single vowels)
@@ -632,7 +627,7 @@ public struct DefaultSpellChecker: SpellChecker {
             "ai", "ao", "au", "ay", "ia", "ie", "iu", "oa", "oe", "oi", "oo",
             "ua", "ue", "ui", "uo", "uy", "ye",
             "oai", "oao", "oay", "oeo", "uoi", "uya", "uye", "uyu", "uao", "uay",
-            "ieu", "yeu"
+            "ieu", "yeu",
         ]
 
         return validPatterns.contains(normalized)

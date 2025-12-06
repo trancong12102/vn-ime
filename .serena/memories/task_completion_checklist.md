@@ -4,25 +4,35 @@ When completing a task in VnIme, follow this checklist:
 
 ## Before Committing
 
-### 1. Build Check
+### 1. Full Verification (Recommended)
+```bash
+# Run all checks in one command
+swift build && swift test && swiftlint lint
+```
+
+Or run individually:
+
+### 2. Build Check
 ```bash
 swift build
 ```
 Ensure the project builds without errors.
 
-### 2. Run Tests
+### 3. Run Tests
 ```bash
 swift test
 ```
 All tests should pass. If adding new functionality, add corresponding tests.
 
-### 3. Linting (if SwiftLint installed)
+### 4. Linting
 ```bash
-swiftlint
+swiftlint lint
 ```
-Fix any style violations.
+Fix any style violations. Current acceptable thresholds:
+- Warnings: OK to commit (but fix when possible)
+- Errors: Must fix before committing (except test file length)
 
-### 4. Code Review Checklist
+### 5. Code Review Checklist
 - [ ] Follows naming conventions (camelCase, PascalCase)
 - [ ] Uses `let` over `var` where possible
 - [ ] No force unwrapping (`!`) unless justified

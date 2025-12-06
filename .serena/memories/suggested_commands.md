@@ -32,14 +32,24 @@ swift test --filter "EngineTests/testEngineInitialization"
 ## Linting Commands
 
 ```bash
-# Run SwiftLint (if installed)
-swiftlint
+# Run SwiftLint
+swiftlint lint
 
 # Run SwiftLint with autocorrect
-swiftlint --autocorrect
+swiftlint --fix
 
 # Check SwiftLint version
 swiftlint version
+
+# Install SwiftLint (if not installed)
+brew install swiftlint
+```
+
+## Full Verification (Recommended Before Commit)
+
+```bash
+# Run build, tests, and lint in sequence
+swift build && swift test && swiftlint lint
 ```
 
 ## Git Commands

@@ -28,7 +28,7 @@ public final class QuickTelex: QuickTelexHandling, @unchecked Sendable {
         "nn": "ng",
         "qq": "qu",
         "pp": "ph",
-        "tt": "th"
+        "tt": "th",
     ]
 
     public init() {}

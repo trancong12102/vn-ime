@@ -58,7 +58,7 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             SettingsKey.launchAtLogin.rawValue: false,
             SettingsKey.showDockIcon.rawValue: false,
             SettingsKey.autoCapitalize.rawValue: true,
-            SettingsKey.restoreIfWrongSpelling.rawValue: true
+            SettingsKey.restoreIfWrongSpelling.rawValue: true,
         ])
     }
 
@@ -204,7 +204,7 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             .inputMethod, .spellCheckEnabled,
             .smartSwitchEnabled, .quickTelexEnabled,
             .launchAtLogin, .showDockIcon, .autoCapitalize,
-            .restoreIfWrongSpelling
+            .restoreIfWrongSpelling,
         ]
 
         lock.lock()

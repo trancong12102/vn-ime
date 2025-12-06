@@ -92,7 +92,7 @@ public enum VietnameseConstants {
     /// Consonants that can start a word (single letters)
     public static let consonants: Set<Character> = [
         "b", "c", "d", "g", "h", "k", "l", "m",
-        "n", "p", "q", "r", "s", "t", "v", "x"
+        "n", "p", "q", "r", "s", "t", "v", "x",
     ]
 
     /// Valid first consonant clusters in Vietnamese (23 patterns)
@@ -100,7 +100,7 @@ public enum VietnameseConstants {
     public static let firstConsonantClusters: Set<String> = [
         "b", "c", "ch", "d", "g", "gh", "gi", "h", "k", "kh",
         "l", "m", "n", "ng", "ngh", "nh", "p", "ph", "qu", "r",
-        "s", "t", "th", "tr", "v", "x"
+        "s", "t", "th", "tr", "v", "x",
     ]
 
     /// Valid ending consonants in Vietnamese (9 patterns)
@@ -125,7 +125,7 @@ public enum VietnameseConstants {
         "@", "#", "$", "%", "^", "&", "*",
         "+", "=", "-", "_",
         "<", ">",
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
     ]
 
     /// Check if a character is a word break
@@ -194,7 +194,7 @@ public enum VietnameseConstants {
 
 // MARK: - Backspace Key Code
 
-extension TypedCharacter {
+public extension TypedCharacter {
     /// Virtual key code for backspace/delete
-    public static let backspaceKeyCode: UInt16 = 51
+    static let backspaceKeyCode: UInt16 = 51
 }

@@ -339,10 +339,8 @@ public struct TypingBuffer: Sendable {
         // Triple vowel patterns - mark usually goes on middle vowel
 
         // Check for modified vowel first - it takes priority
-        for pos in positions {
-            if characters[pos].isModifiedVowel {
-                return pos
-            }
+        if let pos = positions.first(where: { characters[$0].isModifiedVowel }) {
+            return pos
         }
 
         // uôi, ươi: mark on middle vowel (ô or ơ)
@@ -411,11 +409,9 @@ public struct TypingBuffer: Sendable {
     public mutating func removeMark() -> Bool {
         // Find vowel with existing tone mark
         let vowelPositions = findVowelPositions()
-        for pos in vowelPositions {
-            if characters[pos].state.hasToneMark {
-                characters[pos].state.clearToneMark()
-                return true
-            }
+        if let pos = vowelPositions.first(where: { characters[$0].state.hasToneMark }) {
+            characters[pos].state.clearToneMark()
+            return true
         }
         return false
     }
@@ -433,12 +429,9 @@ public struct TypingBuffer: Sendable {
         var currentTonePos: Int?
         var currentTone: CharacterState?
 
-        for pos in vowelPositions {
-            if characters[pos].state.hasToneMark {
-                currentTonePos = pos
-                currentTone = characters[pos].state.toneMark
-                break
-            }
+        if let pos = vowelPositions.first(where: { characters[$0].state.hasToneMark }) {
+            currentTonePos = pos
+            currentTone = characters[pos].state.toneMark
         }
 
         // No tone mark to reposition
@@ -464,13 +457,7 @@ public struct TypingBuffer: Sendable {
 
     /// Find position of vowel that currently has a tone mark
     public func findMarkedVowelPosition() -> Int? {
-        let vowelPositions = findVowelPositions()
-        for pos in vowelPositions {
-            if characters[pos].state.hasToneMark {
-                return pos
-            }
-        }
-        return nil
+        findVowelPositions().first { characters[$0].state.hasToneMark }
     }
 
     // MARK: - Spell Validation

@@ -7,8 +7,8 @@ import Foundation
 public enum VietnameseTable {
     // MARK: - Vowel Tables
 
-    /// Each vowel has 6 variants: base, sắc, huyền, hỏi, ngã, nặng
-    /// Index: 0=none, 1=acute, 2=grave, 3=hook, 4=tilde, 5=dotBelow
+    // Each vowel has 6 variants: base, sắc, huyền, hỏi, ngã, nặng
+    // Index: 0=none, 1=acute, 2=grave, 3=hook, 4=tilde, 5=dotBelow
 
     // a variants (no modifier)
     private static let aTable: [Character] = ["a", "á", "à", "ả", "ã", "ạ"]
@@ -176,12 +176,18 @@ public enum VietnameseTable {
     /// Convert tone mark index to CharacterState
     private static func indexToMark(_ index: Int) -> CharacterState {
         switch index {
-        case 1: return .acute
-        case 2: return .grave
-        case 3: return .hook
-        case 4: return .tilde
-        case 5: return .dotBelow
-        default: return []
+        case 1:
+            return .acute
+        case 2:
+            return .grave
+        case 3:
+            return .hook
+        case 4:
+            return .tilde
+        case 5:
+            return .dotBelow
+        default:
+            return []
         }
     }
 
@@ -192,15 +198,15 @@ public enum VietnameseTable {
         ("i", [([], iTable)]),
         ("o", [([], oTable), (.circumflex, ooTable), (.hornOrBreve, owTable)]),
         ("u", [([], uTable), (.hornOrBreve, uwTable)]),
-        ("y", [([], yTable)])
+        ("y", [([], yTable)]),
     ]
 }
 
 // MARK: - TypingBuffer Unicode Extension
 
-extension TypingBuffer {
+public extension TypingBuffer {
     /// Convert the entire buffer to a Unicode string
-    public func toUnicodeString() -> String {
+    func toUnicodeString() -> String {
         var result = ""
         result.reserveCapacity(count)
 

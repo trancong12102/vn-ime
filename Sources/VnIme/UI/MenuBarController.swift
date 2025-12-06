@@ -56,7 +56,9 @@ public final class MenuBarController {
             keyEquivalent: "v"
         )
         vietnameseMenuItem?.target = self
-        menu.addItem(vietnameseMenuItem!)
+        if let item = vietnameseMenuItem {
+            menu.addItem(item)
+        }
 
         englishMenuItem = NSMenuItem(
             title: "English",
@@ -64,7 +66,9 @@ public final class MenuBarController {
             keyEquivalent: "e"
         )
         englishMenuItem?.target = self
-        menu.addItem(englishMenuItem!)
+        if let item = englishMenuItem {
+            menu.addItem(item)
+        }
 
         updateMenuState()
 

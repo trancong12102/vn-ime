@@ -39,4 +39,3 @@ public struct UnicodeCharacterTable: CharacterTable {
         true
     }
 }
-
