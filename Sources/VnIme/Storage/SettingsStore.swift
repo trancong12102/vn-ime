@@ -144,7 +144,20 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             defaults.set(newValue, forKey: SettingsKey.launchAtLogin.rawValue)
             lock.unlock()
             settingsChangedSubject.send(.launchAtLogin)
-            // TODO: Register/unregister login item
+
+            // Register/unregister login item on main thread
+            // Note: SMAppService requires proper code signing, skip in debug builds
+            #if !DEBUG
+            Task { @MainActor in
+                do {
+                    try AppLifecycleManager.shared.setLaunchAtLogin(newValue)
+                } catch {
+                    print("Failed to update launch at login: \(error.localizedDescription)")
+                }
+            }
+            #else
+            print("Launch at login is disabled in debug builds (requires code signing)")
+            #endif
         }
     }
 
@@ -159,7 +172,11 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             defaults.set(newValue, forKey: SettingsKey.showDockIcon.rawValue)
             lock.unlock()
             settingsChangedSubject.send(.showDockIcon)
-            // TODO: Update NSApp.activationPolicy
+
+            // Update dock icon visibility on main thread
+            Task { @MainActor in
+                AppLifecycleManager.shared.setDockIconVisible(newValue)
+            }
         }
     }
 

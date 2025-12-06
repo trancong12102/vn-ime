@@ -31,19 +31,27 @@ struct GeneralSettingsView: View {
     @AppStorage("smartSwitchEnabled") private var smartSwitchEnabled = true
 
     var body: some View {
-        Form {
-            Section("Startup") {
-                Toggle("Launch at login", isOn: $launchAtLogin)
-                Toggle("Show Dock icon", isOn: $showDockIcon)
+        VStack(alignment: .leading, spacing: 16) {
+            GroupBox("Startup") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Launch at login", isOn: $launchAtLogin)
+                    Toggle("Show Dock icon", isOn: $showDockIcon)
+                }
+                .padding(.vertical, 4)
             }
 
-            Section("Features") {
-                Toggle("Enable spell checking", isOn: $spellCheckEnabled)
-                Toggle("Smart language switch per app", isOn: $smartSwitchEnabled)
+            GroupBox("Features") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Enable spell checking", isOn: $spellCheckEnabled)
+                    Toggle("Smart language switch per app", isOn: $smartSwitchEnabled)
+                }
+                .padding(.vertical, 4)
             }
+
+            Spacer()
         }
-        .formStyle(.grouped)
         .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -56,20 +64,25 @@ struct InputMethodSettingsView: View {
     private let inputMethods = ["Telex", "Simple Telex"]
 
     var body: some View {
-        Form {
-            Section("Input Method") {
-                Picker("Method", selection: $inputMethod) {
-                    ForEach(inputMethods, id: \.self) { method in
-                        Text(method).tag(method)
+        VStack(alignment: .leading, spacing: 16) {
+            GroupBox("Input Method") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Picker("Method", selection: $inputMethod) {
+                        ForEach(inputMethods, id: \.self) { method in
+                            Text(method).tag(method)
+                        }
                     }
-                }
 
-                Toggle("Quick Telex (cc=ch, gg=gi...)", isOn: $quickTelexEnabled)
-                Toggle("Auto-capitalize first letter", isOn: $autoCapitalize)
+                    Toggle("Quick Telex (cc=ch, gg=gi...)", isOn: $quickTelexEnabled)
+                    Toggle("Auto-capitalize first letter", isOn: $autoCapitalize)
+                }
+                .padding(.vertical, 4)
             }
+
+            Spacer()
         }
-        .formStyle(.grouped)
         .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

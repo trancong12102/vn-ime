@@ -193,11 +193,20 @@ final class AccessibilityPermissionWindowController {
         }
 
         let contentView = AccessibilityPermissionView(viewModel: viewModel)
-        let hostingController = NSHostingController(rootView: contentView)
+        let hostingView = NSHostingView(rootView: contentView)
 
-        let window = NSWindow(contentViewController: hostingController)
+        // Calculate size manually to avoid constraint issues
+        let fittingSize = hostingView.fittingSize
+        hostingView.frame = CGRect(origin: .zero, size: fittingSize)
+
+        let window = NSWindow(
+            contentRect: NSRect(origin: .zero, size: fittingSize),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.contentView = hostingView
         window.title = "VnIme - Permission Required"
-        window.styleMask = [.titled, .closable]
         window.level = .floating
         window.center()
 

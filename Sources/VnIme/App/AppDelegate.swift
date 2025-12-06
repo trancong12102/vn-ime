@@ -38,6 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - App Lifecycle
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        applyLifecycleSettings()
         setupMenuBar()
         setupEventHandler()
     }
@@ -46,6 +47,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Cleanup resources
         eventHandler?.stop()
         applicationDetector?.stopMonitoring()
+    }
+
+    // MARK: - Lifecycle Settings
+
+    private func applyLifecycleSettings() {
+        // Apply dock icon setting
+        AppLifecycleManager.shared.setDockIconVisible(settings.showDockIcon)
+
+        // Note: SMAppService.mainApp requires the app to be properly code-signed
+        // and may crash in development builds. We skip the sync in debug builds.
+        #if !DEBUG
+        // Sync launch at login setting with actual system state
+        // User might have changed it in System Settings directly
+        let actuallyEnabled = AppLifecycleManager.shared.isLaunchAtLoginEnabled
+        if settings.launchAtLogin != actuallyEnabled {
+            // Update stored setting to match system state (without triggering another registration)
+            let defaults = UserDefaults.standard
+            defaults.set(actuallyEnabled, forKey: SettingsKey.launchAtLogin.rawValue)
+        }
+
+        // If launch at login requires approval, we could show a hint to the user
+        // but for now we just log it
+        if AppLifecycleManager.shared.launchAtLoginRequiresApproval {
+            print("Launch at login requires approval in System Settings > Login Items")
+        }
+        #endif
     }
 
     // MARK: - Menu Bar Setup
