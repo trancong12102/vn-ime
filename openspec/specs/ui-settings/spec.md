@@ -1,0 +1,123 @@
+# ui-settings Specification
+
+## Purpose
+TBD - created by archiving change port-openkey-to-swift. Update Purpose after archive.
+## Requirements
+### Requirement: Menu Bar Integration
+
+The system SHALL provide a status bar menu for quick access to features.
+
+#### Scenario: Status bar icon display
+- **WHEN** application is running
+- **THEN** status bar icon is displayed showing current language (V/E)
+
+#### Scenario: Menu bar menu access
+- **WHEN** user clicks status bar icon
+- **THEN** menu is displayed with input options
+
+#### Scenario: Quick language toggle
+- **WHEN** user selects language toggle from menu
+- **THEN** input language switches immediately
+
+#### Scenario: Input method selection
+- **WHEN** user selects input method from submenu
+- **THEN** input method changes (Telex, Simple Telex)
+
+---
+
+### Requirement: Settings Panel
+
+The system SHALL provide a settings panel for configuration.
+
+#### Scenario: Open settings panel
+- **WHEN** user selects "Control Panel" from menu
+- **THEN** settings window is displayed
+
+#### Scenario: Input method settings
+- **WHEN** user accesses input method settings
+- **THEN** options for Telex, Simple Telex are available
+
+#### Scenario: Spelling settings
+- **WHEN** user accesses spelling settings
+- **THEN** options include: enable/disable spell check, restore invalid words
+
+#### Scenario: Feature toggles
+- **WHEN** user accesses feature settings
+- **THEN** options include: Quick Telex, Smart Switch, auto-capitalization
+
+#### Scenario: Hotkey configuration
+- **WHEN** user accesses hotkey settings
+- **THEN** language switch hotkey can be customized
+
+---
+
+### Requirement: About Window
+
+The system SHALL provide application information.
+
+#### Scenario: Display about window
+- **WHEN** user selects "About" from menu
+- **THEN** window displays: app name, version, copyright, credits
+
+---
+
+### Requirement: Configuration Persistence
+
+The system SHALL persist all user settings.
+
+#### Scenario: Settings saved automatically
+- **WHEN** user changes any setting
+- **THEN** setting is saved to UserDefaults immediately
+
+#### Scenario: Settings restored on launch
+- **WHEN** application launches
+- **THEN** all settings are restored from UserDefaults
+
+#### Scenario: Default settings
+- **WHEN** settings are not found
+- **THEN** sensible defaults are applied:
+  - Language: Vietnamese
+  - Input method: Telex
+  - Spell check: enabled
+
+---
+
+### Requirement: Application Lifecycle
+
+The system SHALL manage application lifecycle properly.
+
+#### Scenario: Background app mode
+- **WHEN** dock icon is hidden in settings
+- **THEN** application runs as menu bar only (background app)
+
+#### Scenario: Dock icon mode
+- **WHEN** dock icon is enabled in settings
+- **THEN** application appears in dock
+
+#### Scenario: Login item
+- **WHEN** launch at login is enabled
+- **THEN** application starts automatically on login
+
+#### Scenario: Graceful exit
+- **WHEN** user quits application
+- **THEN** event tap is cleaned up
+- **AND** settings are saved
+
+---
+
+### Requirement: System Notifications
+
+The system SHALL respond to system notifications.
+
+#### Scenario: System wake handling
+- **WHEN** system wakes from sleep
+- **THEN** event tap is re-initialized if needed
+
+#### Scenario: System sleep handling
+- **WHEN** system goes to sleep
+- **THEN** event tap is properly suspended
+
+#### Scenario: Space change handling
+- **WHEN** user switches to different macOS space
+- **THEN** new typing session is started
+
