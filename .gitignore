@@ -115,3 +115,6 @@ DerivedData/
 
 # SwiftLint
 .swiftlint.yml.lock
+
+# Binary
+*.app

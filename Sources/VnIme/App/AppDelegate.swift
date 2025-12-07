@@ -105,10 +105,74 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateMenuBarIcon(isVietnameseMode: Bool) {
         if let button = statusItem?.button {
-            // Use "V" for Vietnamese mode, "E" for English mode
-            let symbolName = isVietnameseMode ? "v.circle.fill" : "e.circle"
-            button.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "VnIme")
+            button.image = Self.createMenuBarIcon(isVietnameseMode: isVietnameseMode)
         }
+    }
+
+    /// Creates a menu bar icon matching macOS native input source style
+    /// - Vietnamese mode: "VI" filled (like macOS active input source)
+    /// - English mode: "EN" not filled (outline only)
+    private static func createMenuBarIcon(isVietnameseMode: Bool) -> NSImage {
+        // Match macOS input source icon: wider rounded rectangle
+        let size = NSSize(width: 22, height: 16)
+
+        // Use NSImage with drawing handler for proper scaling on Retina
+        let image = NSImage(size: size, flipped: false) { rect in
+            if isVietnameseMode {
+                Self.drawFilledIcon(text: "VI", in: rect)
+            } else {
+                Self.drawOutlineIcon(text: "EN", in: rect)
+            }
+            return true
+        }
+
+        image.isTemplate = true
+        return image
+    }
+
+    /// Draws filled icon like macOS native input source (active state)
+    /// Uses knockout effect: text is cut out from the filled rectangle
+    private static func drawFilledIcon(text: String, in rect: NSRect) {
+        let cornerRadius: CGFloat = 3.5
+
+        // Draw filled rounded rectangle background (full rect, no inset)
+        let bgPath = NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius)
+        NSColor.black.setFill()
+        bgPath.fill()
+
+        // Knockout text: use destinationOut compositing to cut text from background
+        let font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.black,
+        ]
+
+        let textSize = text.size(withAttributes: attributes)
+        let textPoint = NSPoint(
+            x: rect.midX - textSize.width / 2,
+            y: rect.midY - textSize.height / 2
+        )
+
+        // Cut text shape out of the background
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        text.draw(at: textPoint, withAttributes: attributes)
+        NSGraphicsContext.current?.compositingOperation = .sourceOver
+    }
+
+    /// Draws outline icon (inactive state) - text only, no background
+    private static func drawOutlineIcon(text: String, in rect: NSRect) {
+        let font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.black,
+        ]
+
+        let textSize = text.size(withAttributes: attributes)
+        let textPoint = NSPoint(
+            x: rect.midX - textSize.width / 2,
+            y: rect.midY - textSize.height / 2
+        )
+        text.draw(at: textPoint, withAttributes: attributes)
     }
 
     private func updateLanguageModeMenuItem(isVietnameseMode: Bool) {
@@ -169,6 +233,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         self.textInjector = injector
+
+        // Apply advanced settings to TextInjector
+        injector.fixBrowserAutocomplete = settings.fixBrowserAutocomplete
+        injector.fixChromiumBrowser = settings.fixChromiumBrowser
+        injector.sendKeyStepByStep = settings.sendKeyStepByStep
 
         let appDetector = ApplicationDetector()
         self.applicationDetector = appDetector
@@ -231,6 +300,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             engine.quickTelex.isEnabled = settings.quickTelexEnabled
         case .restoreIfWrongSpelling:
             engine.restoreIfWrongSpelling = settings.restoreIfWrongSpelling
+        case .fixBrowserAutocomplete:
+            textInjector?.fixBrowserAutocomplete = settings.fixBrowserAutocomplete
+        case .fixChromiumBrowser:
+            textInjector?.fixChromiumBrowser = settings.fixChromiumBrowser
+        case .sendKeyStepByStep:
+            textInjector?.sendKeyStepByStep = settings.sendKeyStepByStep
         default:
             break
         }

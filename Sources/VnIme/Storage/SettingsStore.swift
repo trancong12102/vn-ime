@@ -11,6 +11,10 @@ public enum SettingsKey: String {
     case showDockIcon = "VnImeShowDockIcon"
     case autoCapitalize = "VnImeAutoCapitalize"
     case restoreIfWrongSpelling = "VnImeRestoreIfWrongSpelling"
+    // Advanced settings
+    case fixBrowserAutocomplete = "VnImeFixBrowserAutocomplete"
+    case fixChromiumBrowser = "VnImeFixChromiumBrowser"
+    case sendKeyStepByStep = "VnImeSendKeyStepByStep"
 }
 
 /// Protocol for settings storage
@@ -26,6 +30,11 @@ public protocol SettingsStoring: AnyObject, Sendable {
     var smartSwitchEnabled: Bool { get set }
     var launchAtLogin: Bool { get set }
     var showDockIcon: Bool { get set }
+
+    // Advanced settings
+    var fixBrowserAutocomplete: Bool { get set }
+    var fixChromiumBrowser: Bool { get set }
+    var sendKeyStepByStep: Bool { get set }
 
     // Publisher for settings changes
     var settingsChanged: AnyPublisher<SettingsKey, Never> { get }
@@ -59,6 +68,10 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             SettingsKey.showDockIcon.rawValue: false,
             SettingsKey.autoCapitalize.rawValue: true,
             SettingsKey.restoreIfWrongSpelling.rawValue: true,
+            // Advanced settings
+            SettingsKey.fixBrowserAutocomplete.rawValue: true,
+            SettingsKey.fixChromiumBrowser.rawValue: true,
+            SettingsKey.sendKeyStepByStep.rawValue: false,
         ])
     }
 
@@ -197,6 +210,50 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
         }
     }
 
+    // MARK: - Advanced Settings
+
+    public var fixBrowserAutocomplete: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return defaults.bool(forKey: SettingsKey.fixBrowserAutocomplete.rawValue)
+        }
+        set {
+            lock.lock()
+            defaults.set(newValue, forKey: SettingsKey.fixBrowserAutocomplete.rawValue)
+            lock.unlock()
+            settingsChangedSubject.send(.fixBrowserAutocomplete)
+        }
+    }
+
+    public var fixChromiumBrowser: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return defaults.bool(forKey: SettingsKey.fixChromiumBrowser.rawValue)
+        }
+        set {
+            lock.lock()
+            defaults.set(newValue, forKey: SettingsKey.fixChromiumBrowser.rawValue)
+            lock.unlock()
+            settingsChangedSubject.send(.fixChromiumBrowser)
+        }
+    }
+
+    public var sendKeyStepByStep: Bool {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return defaults.bool(forKey: SettingsKey.sendKeyStepByStep.rawValue)
+        }
+        set {
+            lock.lock()
+            defaults.set(newValue, forKey: SettingsKey.sendKeyStepByStep.rawValue)
+            lock.unlock()
+            settingsChangedSubject.send(.sendKeyStepByStep)
+        }
+    }
+
     // MARK: - Reset
 
     public func resetToDefaults() {
@@ -205,6 +262,9 @@ public final class SettingsStore: SettingsStoring, @unchecked Sendable {
             .smartSwitchEnabled, .quickTelexEnabled,
             .launchAtLogin, .showDockIcon, .autoCapitalize,
             .restoreIfWrongSpelling,
+            // Advanced settings
+            .fixBrowserAutocomplete, .fixChromiumBrowser,
+            .sendKeyStepByStep,
         ]
 
         lock.lock()

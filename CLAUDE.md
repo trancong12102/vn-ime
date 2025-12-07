@@ -37,6 +37,44 @@ Benefits:
 
 ---
 
+<current_datetime>
+## Current Date and Time
+
+**MANDATORY**: Always use the `date` command via Bash tool to get the current date/time. Never rely on trained knowledge or system-provided date information.
+
+### Why This Matters
+
+- Trained knowledge has a cutoff date and cannot reflect the actual current time
+- System-provided dates in prompts may be cached or stale
+- The `date` command provides the authoritative, real-time system clock
+
+### Usage
+
+```bash
+# Get current date and time
+date
+
+# Get formatted date
+date "+%Y-%m-%d %H:%M:%S"
+
+# Get specific components
+date "+%Y"  # Year
+date "+%m"  # Month
+date "+%d"  # Day
+```
+
+### When to Use
+
+Use the `date` command whenever:
+- Writing timestamps to files or logs
+- Creating date-based filenames or directories
+- Comparing dates or checking deadlines
+- Answering questions about "today", "now", "current time"
+- Any operation requiring accurate temporal information
+</current_datetime>
+
+---
+
 <research_with_mcp_tools>
 ## Technical Research
 
@@ -62,6 +100,8 @@ Use MCP tools when:
    - `mcp__exa__get_code_context_exa` - code questions, examples
    - `mcp__exa__web_search_exa` - latest news, blog posts, releases
 
+   **MANDATORY**: When searching for trends, best practices, or any time-sensitive knowledge that includes a year (e.g., "best practices 2024", "trends 2025"), you MUST first run `date "+%Y"` to get the current year and use that year in your search query. Never hardcode years like 2023, 2024, etc.
+
 3. **DeepWiki** (GitHub repositories)
    - `mcp__deepwiki__ask_question` - GitHub repo documentation
    - `mcp__deepwiki__read_wiki_contents` - repo wiki content
@@ -72,10 +112,13 @@ Use the Task tool with a focused prompt to research documentation in isolated co
 
 Example for brainstorming:
 ```
+# First, get current year
+date "+%Y"  # Returns: 2025
+
 Task tool with prompt:
 "Research the best approach for implementing authentication in NestJS using Context7 and Exa. Return:
 - Recommended libraries (with latest versions)
-- Best practices for 2024/2025
+- Best practices for 2025 (use current year from date command)
 - Security considerations
 - Example implementation
 - Comparison of approaches (Passport vs built-in guards)"

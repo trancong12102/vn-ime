@@ -5,8 +5,10 @@ struct VnImeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Settings {
+        Window("VnIme", id: "settings") {
             SettingsView()
         }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
     }
 }
