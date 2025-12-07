@@ -192,9 +192,74 @@ public enum VietnameseConstants {
     }
 }
 
-// MARK: - Backspace Key Code
+// MARK: - Key Codes
 
 public extension TypedCharacter {
     /// Virtual key code for backspace/delete
     static let backspaceKeyCode: UInt16 = 51
+}
+
+// MARK: - Break Key Codes
+
+/// Key codes that break/reset the typing session.
+///
+/// These are navigation and control keys that should reset the engine buffer
+/// without producing visible character output. Unlike word break *characters*
+/// (space, punctuation), break *keycodes* are detected by their virtual key code.
+///
+/// Reference: OpenKey Engine.cpp lines 21-28 (_breakCode array)
+public enum BreakKeyCodes {
+    // MARK: - macOS Virtual Key Codes
+
+    /// ESC key - cancels current input
+    public static let escape: UInt16 = 53
+
+    /// Tab key - navigation
+    public static let tab: UInt16 = 48
+
+    /// Return key (main keyboard)
+    public static let returnKey: UInt16 = 36
+
+    /// Enter key (numpad)
+    public static let enter: UInt16 = 76
+
+    /// Left arrow - cursor navigation
+    public static let leftArrow: UInt16 = 123
+
+    /// Right arrow - cursor navigation
+    public static let rightArrow: UInt16 = 124
+
+    /// Down arrow - cursor navigation
+    public static let downArrow: UInt16 = 125
+
+    /// Up arrow - cursor navigation
+    public static let upArrow: UInt16 = 126
+
+    // MARK: - Navigation Break Keys Set
+
+    /// Set of navigation key codes that should break the typing session.
+    /// These keys reset the buffer without appending any character.
+    ///
+    /// Matches OpenKey's _breakCode array (excluding punctuation keycodes,
+    /// which are handled separately via character-based word break detection).
+    public static let navigationBreaks: Set<UInt16> = [
+        escape,      // ESC
+        tab,         // Tab
+        returnKey,   // Return
+        enter,       // Enter (numpad)
+        leftArrow,   // Left Arrow
+        rightArrow,  // Right Arrow
+        downArrow,   // Down Arrow
+        upArrow,     // Up Arrow
+    ]
+
+    // MARK: - Detection
+
+    /// Check if a key code is a break key code (navigation key that resets session).
+    ///
+    /// - Parameter keyCode: The virtual key code to check
+    /// - Returns: true if the key code should break/reset the typing session
+    public static func isBreakKeyCode(_ keyCode: UInt16) -> Bool {
+        navigationBreaks.contains(keyCode)
+    }
 }

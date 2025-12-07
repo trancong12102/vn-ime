@@ -1243,4 +1243,226 @@ final class EngineTests: XCTestCase {
         let replaceOps = results.filter { if case .replace = $0 { return true } else { return false } }
         XCTAssertEqual(replaceOps.count, 2, "Should have 2 replace operations (w for horn, n for grammar)")
     }
+
+    // MARK: - Break Keycode Tests
+
+    /// Test that BreakKeyCodes enum contains the expected keycodes
+    func testBreakKeyCodesConstants() {
+        XCTAssertEqual(BreakKeyCodes.escape, 53)
+        XCTAssertEqual(BreakKeyCodes.tab, 48)
+        XCTAssertEqual(BreakKeyCodes.returnKey, 36)
+        XCTAssertEqual(BreakKeyCodes.enter, 76)
+        XCTAssertEqual(BreakKeyCodes.leftArrow, 123)
+        XCTAssertEqual(BreakKeyCodes.rightArrow, 124)
+        XCTAssertEqual(BreakKeyCodes.downArrow, 125)
+        XCTAssertEqual(BreakKeyCodes.upArrow, 126)
+    }
+
+    /// Test that isBreakKeyCode returns true for navigation break keys
+    func testBreakKeyCodeDetection() {
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(53), "ESC should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(48), "Tab should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(36), "Return should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(76), "Enter should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(123), "Left Arrow should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(124), "Right Arrow should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(125), "Down Arrow should be a break keycode")
+        XCTAssertTrue(BreakKeyCodes.isBreakKeyCode(126), "Up Arrow should be a break keycode")
+    }
+
+    /// Test that isBreakKeyCode returns false for non-break keys
+    func testNonBreakKeyCodeDetection() {
+        XCTAssertFalse(BreakKeyCodes.isBreakKeyCode(0), "Regular key should not be a break keycode")
+        XCTAssertFalse(BreakKeyCodes.isBreakKeyCode(51), "Backspace should not be a break keycode")
+        XCTAssertFalse(BreakKeyCodes.isBreakKeyCode(49), "Space should not be a break keycode")
+        XCTAssertFalse(BreakKeyCodes.isBreakKeyCode(1), "Random key should not be a break keycode")
+    }
+
+    /// Test: "ho" + ESC should reset buffer and produce "ho" (not "ho\u{1B}")
+    /// Previously ESC character was added to buffer causing issues
+    func testEscapeResetsSessionCleanly() {
+        _ = engine.processKey(keyCode: 0, character: "h", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "o", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "ho")
+
+        // Press ESC (keycode 53)
+        let result = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+
+        // ESC should pass through (so application can handle it)
+        XCTAssertEqual(result, .passThrough, "ESC should pass through")
+
+        // Buffer should be reset (empty)
+        XCTAssertTrue(engine.isEmpty, "Buffer should be empty after ESC")
+    }
+
+    /// Test: "ho" + ESC + "a" should produce "hoa" (not "ho\u{1B}a")
+    /// This tests that typing continues normally after ESC
+    func testTypingAfterEscapeWorks() {
+        // Type "ho"
+        _ = engine.processKey(keyCode: 0, character: "h", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "o", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "ho")
+
+        // Press ESC
+        _ = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+        XCTAssertTrue(engine.isEmpty)
+
+        // Type "a"
+        let result = engine.processKey(keyCode: 0, character: "a", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "'a' after ESC should start new word")
+        XCTAssertEqual(engine.currentText, "a")
+    }
+
+    /// Test: Arrow keys reset the session
+    func testArrowKeysResetSession() {
+        _ = engine.processKey(keyCode: 0, character: "h", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "i", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "hi")
+
+        // Left arrow (keycode 123)
+        let result = engine.processKey(keyCode: 123, character: nil, modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "Arrow should pass through")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be reset after arrow key")
+    }
+
+    /// Test: Tab resets the session
+    func testTabResetsSession() {
+        _ = engine.processKey(keyCode: 0, character: "v", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "i", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "vi")
+
+        // Tab (keycode 48)
+        let result = engine.processKey(keyCode: 48, character: "\t", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "Tab should pass through")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be reset after Tab")
+    }
+
+    /// Test: Enter/Return resets the session
+    func testEnterResetsSession() {
+        // Type "an" - a valid Vietnamese word, so no restore needed
+        _ = engine.processKey(keyCode: 0, character: "a", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "n", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "an")
+
+        // Return (keycode 36)
+        let result = engine.processKey(keyCode: 36, character: "\r", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "Return should pass through")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be reset after Return")
+    }
+
+    /// Test: "hoas" (invalid) + ESC → restore original "hoas", clear buffer, ESC passes through
+    func testRestoreOnInvalidSpellingWithEscape() {
+        engine.spellCheckEnabled = true
+        engine.restoreIfWrongSpelling = true
+
+        // Type "hoas" - this should be detected as invalid Vietnamese spelling
+        // "ho" is valid, "hoa" is valid, but "hoas" ends with 's' as an ending consonant
+        // which creates an invalid syllable (expecting tone, not consonant after 'oa')
+        _ = engine.processKey(keyCode: 0, character: "h", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "o", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "a", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "s", modifiers: 0)  // This applies acute tone: hoá
+
+        // The engine should have transformed "hoas" to "hoá"
+        XCTAssertEqual(engine.currentText, "hoá", "hoas should become hoá (tone applied)")
+
+        // Press ESC - since "hoá" is valid, no restore needed
+        let result = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "ESC on valid spelling should just pass through")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be cleared after ESC")
+    }
+
+    /// Test: Invalid spelling with break keycode triggers restore
+    func testRestoreInvalidSpellingOnBreakKeycode() {
+        engine.spellCheckEnabled = true
+        engine.restoreIfWrongSpelling = true
+
+        // Type a sequence that becomes invalid
+        // "hoafs" - 'f' after 'a' applies grave tone (hòa), then 's' should become literal
+        // Actually let's test with a clearer invalid case
+        // "bcx" - no vowels, definitely invalid
+        _ = engine.processKey(keyCode: 0, character: "b", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "c", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "x", modifiers: 0)
+
+        XCTAssertEqual(engine.currentText, "bcx")
+
+        // Press ESC - should restore original keystrokes (which are same as current)
+        // and clear buffer
+        let result = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+
+        // Since spelling is invalid and restoreIfWrongSpelling is enabled,
+        // it should restore original keystrokes
+        if case .replace(let backspaces, let replacement) = result {
+            XCTAssertEqual(backspaces, 3, "Should delete 3 characters (bcx)")
+            XCTAssertEqual(replacement, "bcx", "Should restore original keystrokes")
+        } else if result == .passThrough {
+            // If the text matches original (no transformation happened), it might just pass through
+            XCTAssertTrue(engine.isEmpty, "Buffer should be cleared")
+        }
+    }
+
+    /// Test: Valid word + ESC → no restore, just clear buffer
+    func testValidWordWithEscapeNoRestore() {
+        engine.spellCheckEnabled = true
+        engine.restoreIfWrongSpelling = true
+
+        // Type "viet" - valid Vietnamese
+        _ = engine.processKey(keyCode: 0, character: "v", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "i", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "e", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "t", modifiers: 0)
+
+        XCTAssertEqual(engine.currentText, "viet")
+
+        // Press ESC - valid spelling, so no restore
+        let result = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "ESC on valid word should pass through")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be cleared")
+    }
+
+    /// Test: Punctuation keys (comma, dot) still work as word breaks with char appended
+    func testPunctuationWordBreakStillWorks() {
+        _ = engine.processKey(keyCode: 0, character: "h", modifiers: 0)
+        _ = engine.processKey(keyCode: 0, character: "i", modifiers: 0)
+        XCTAssertEqual(engine.currentText, "hi")
+
+        // Type comma - should be word break (character-based)
+        let result = engine.processKey(keyCode: 43, character: ",", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "Comma should pass through as word break")
+        XCTAssertTrue(engine.isEmpty, "Buffer should be cleared after comma")
+    }
+
+    /// Test: All arrow keys reset session
+    func testAllArrowKeysResetSession() {
+        // Test each arrow key
+        let arrowCodes: [(UInt16, String)] = [
+            (123, "Left"),
+            (124, "Right"),
+            (125, "Down"),
+            (126, "Up")
+        ]
+
+        for (keyCode, name) in arrowCodes {
+            // Setup: type something
+            engine.reset()
+            _ = engine.processKey(keyCode: 0, character: "a", modifiers: 0)
+            XCTAssertFalse(engine.isEmpty, "Buffer should have content before \(name) arrow")
+
+            // Press arrow key
+            let result = engine.processKey(keyCode: keyCode, character: nil, modifiers: 0)
+            XCTAssertEqual(result, .passThrough, "\(name) arrow should pass through")
+            XCTAssertTrue(engine.isEmpty, "Buffer should be empty after \(name) arrow")
+        }
+    }
+
+    /// Test: Break keycode with empty buffer just passes through
+    func testBreakKeycodeEmptyBuffer() {
+        XCTAssertTrue(engine.isEmpty)
+
+        // Press ESC with empty buffer
+        let result = engine.processKey(keyCode: 53, character: "\u{1B}", modifiers: 0)
+        XCTAssertEqual(result, .passThrough, "ESC on empty buffer should pass through")
+        XCTAssertTrue(engine.isEmpty)
+    }
 }

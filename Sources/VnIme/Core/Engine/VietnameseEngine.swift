@@ -118,6 +118,14 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
             return handleBackspace()
         }
 
+        // Handle break keycodes (ESC, arrows, Tab, Enter) - reset session
+        // Check keycode BEFORE character to catch navigation keys that may produce
+        // control characters or no character at all.
+        // Reference: OpenKey Engine.cpp isWordBreak() checks _breakCode array
+        if BreakKeyCodes.isBreakKeyCode(keyCode) {
+            return handleBreakKeycode()
+        }
+
         // Need a character to process
         guard let char = character else {
             return .passThrough
@@ -674,6 +682,42 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
         stateHistory.removeAll()
     }
 
+    // MARK: - Break Keycode Handling
+
+    /// Handles break keycodes (ESC, arrows, Tab, Enter) that reset the typing session.
+    ///
+    /// Unlike word break *characters* (space, punctuation), break *keycodes* are detected
+    /// by their virtual key code, not the character they produce. This ensures navigation
+    /// keys are caught even if they produce control characters or no character at all.
+    ///
+    /// Behavior:
+    /// 1. Check restore-if-wrong-spelling (if enabled and spelling is invalid)
+    /// 2. Reset the engine buffer
+    /// 3. Return `.passThrough` to let the key event pass to the application
+    ///
+    /// Unlike word break characters, break keycodes do NOT:
+    /// - Append any character to the output
+    /// - Save to history (ESC = cancel, arrows = navigation)
+    ///
+    /// Reference: OpenKey Engine.cpp isWordBreak() and startNewSession()
+    private func handleBreakKeycode() -> EngineResult {
+        // Check for restore-on-invalid before resetting
+        if let restoreResult = checkRestoreIfWrongSpellingForBreakKey() {
+            reset()
+            return restoreResult
+        }
+
+        // Reset buffer and state (no history save for break keycodes)
+        reset()
+        return .passThrough
+    }
+
+    /// Check if spelling is wrong and restore original keystrokes for break keycodes.
+    /// Delegates to shared implementation with no suffix character.
+    private func checkRestoreIfWrongSpellingForBreakKey() -> EngineResult? {
+        checkRestoreIfWrongSpellingCore(suffixChar: nil)
+    }
+
     // MARK: - Word Break Handling
 
     private func handleWordBreak(wordBreakChar: Character) -> EngineResult {
@@ -705,6 +749,16 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     /// - Parameter wordBreakChar: The word break character (space, punctuation) to append after restoration
     /// - Returns: EngineResult if restoration occurred, nil otherwise
     private func checkRestoreIfWrongSpelling(wordBreakChar: Character) -> EngineResult? {
+        checkRestoreIfWrongSpellingCore(suffixChar: wordBreakChar)
+    }
+
+    /// Core implementation for restore-if-wrong-spelling check.
+    ///
+    /// - Parameter suffixChar: Optional character to append after restoration.
+    ///   - For word break characters (space, punctuation): the break char is appended
+    ///   - For break keycodes (ESC, arrows): nil, no character appended
+    /// - Returns: EngineResult if restoration occurred, nil otherwise
+    private func checkRestoreIfWrongSpellingCore(suffixChar: Character?) -> EngineResult? {
         // Skip if feature is disabled or spell checking is off/bypassed
         guard restoreIfWrongSpelling,
               spellCheckEnabled,
@@ -721,13 +775,13 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
 
         // Only restore if current spelling is invalid
         let result = spellChecker.check(currentText)
-        guard case .invalid(_) = result else {
+        guard case .invalid = result else {
             return nil
         }
 
-        // Restore: delete transformed text and output original keystrokes + word break char
+        // Restore: delete transformed text and output original keystrokes
         let backspaceCount = previousOutputLength
-        let replacement = originalKeys + String(wordBreakChar)
+        let replacement = suffixChar.map { originalKeys + String($0) } ?? originalKeys
         return .replace(backspaceCount: backspaceCount, replacement: replacement)
     }
 
