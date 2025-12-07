@@ -117,19 +117,25 @@ private struct PermissionReasonRow: View {
 @MainActor
 final class AccessibilityPermissionViewModel {
     var isPermissionGranted: Bool = false
-
     private var monitoringTask: Task<Void, Never>?
-    var onPermissionGranted: (() -> Void)?
-    var onDismiss: (() -> Void)?
+    private var hasCalledPermissionGranted = false
+
+    // Use a simple callback holder to avoid closure retain cycles
+    private weak var windowController: AccessibilityPermissionWindowController?
 
     init() {
-        checkPermission()
+        isPermissionGranted = AXIsProcessTrusted()
+    }
+
+    func setWindowController(_ controller: AccessibilityPermissionWindowController) {
+        self.windowController = controller
     }
 
     func checkPermission() {
         isPermissionGranted = AXIsProcessTrusted()
-        if isPermissionGranted {
-            onPermissionGranted?()
+        if isPermissionGranted && !hasCalledPermissionGranted {
+            hasCalledPermissionGranted = true
+            windowController?.handlePermissionGranted()
         }
     }
 
@@ -141,9 +147,9 @@ final class AccessibilityPermissionViewModel {
 
     func startMonitoring() {
         // Check permission status periodically using structured concurrency
-        monitoringTask = Task {
+        monitoringTask = Task { [weak self] in
             while !Task.isCancelled {
-                checkPermission()
+                self?.checkPermission()
                 try? await Task.sleep(for: .seconds(1))
             }
         }
@@ -155,7 +161,7 @@ final class AccessibilityPermissionViewModel {
     }
 
     func dismiss() {
-        onDismiss?()
+        windowController?.handleDismiss()
     }
 }
 
@@ -164,10 +170,44 @@ final class AccessibilityPermissionViewModel {
 final class AccessibilityPermissionWindowController {
     private var window: NSWindow?
     private var viewModel: AccessibilityPermissionViewModel?
+    private var onGrantedCallback: (() -> Void)?
 
     static let shared = AccessibilityPermissionWindowController()
 
     private init() {}
+
+    /// Called by view model when permission is granted
+    func handlePermissionGranted() {
+        print("[LotusKey] Permission granted")
+
+        // Stop monitoring first
+        viewModel?.stopMonitoring()
+
+        // Get and clear callback before calling to prevent double call
+        let callback = onGrantedCallback
+        onGrantedCallback = nil
+
+        // Call the callback
+        print("[LotusKey] Calling onGranted callback...")
+        callback?()
+        print("[LotusKey] onGranted callback completed")
+
+        // Just hide the window - don't close or cleanup to avoid memory issues
+        // The window will stay hidden but alive, preventing crashes from dangling references
+        print("[LotusKey] Hiding permission window...")
+        window?.orderOut(nil)
+        print("[LotusKey] Permission window hidden, app should continue running")
+    }
+
+    /// Called by view model when user dismisses
+    func handleDismiss() {
+        if AXIsProcessTrusted() {
+            handlePermissionGranted()
+        } else {
+            // Just hide, don't cleanup
+            window?.orderOut(nil)
+        }
+    }
 
     /// Show the permission dialog
     /// - Parameters:
@@ -179,20 +219,12 @@ final class AccessibilityPermissionWindowController {
             return
         }
 
+        // Store callback
+        self.onGrantedCallback = onGranted
+
         let viewModel = AccessibilityPermissionViewModel()
+        viewModel.setWindowController(self)
         self.viewModel = viewModel
-
-        viewModel.onPermissionGranted = { [weak self] in
-            self?.close()
-            onGranted()
-        }
-
-        viewModel.onDismiss = { [weak self] in
-            self?.close()
-            if AXIsProcessTrusted() {
-                onGranted()
-            }
-        }
 
         let contentView = AccessibilityPermissionView(viewModel: viewModel)
         let hostingView = NSHostingView(rootView: contentView)
@@ -215,14 +247,6 @@ final class AccessibilityPermissionWindowController {
         self.window = window
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-    }
-
-    /// Close the permission dialog
-    func close() {
-        window?.close()
-        window = nil
-        viewModel?.stopMonitoring()
-        viewModel = nil
     }
 
     /// Check if permission is granted without showing UI

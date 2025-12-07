@@ -49,6 +49,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         applicationDetector?.stopMonitoring()
     }
 
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        // Menu bar app should continue running even when all windows are closed
+        print("[LotusKey] applicationShouldTerminateAfterLastWindowClosed called - returning false")
+        return false
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        print("[LotusKey] applicationShouldTerminate called")
+        // Check if this is an unexpected termination
+        if eventHandler == nil {
+            print("[LotusKey] WARNING: Termination requested before event handler initialized")
+        }
+        return .terminateNow
+    }
+
     // MARK: - Lifecycle Settings
 
     private func applyLifecycleSettings() {
@@ -78,7 +93,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Menu Bar Setup
 
     private func setupMenuBar() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // Use fixed width matching macOS native input source icons
+        statusItem = NSStatusBar.system.statusItem(withLength: 28)
 
         updateMenuBarIcon(isVietnameseMode: true)
 
@@ -86,6 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Language mode toggle
         languageModeItem = NSMenuItem(title: "Vietnamese", action: #selector(toggleLanguageMode), keyEquivalent: "")
+        languageModeItem?.target = self
         languageModeItem?.state = .on
         menu.addItem(languageModeItem!)
 
@@ -109,19 +126,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    // MARK: - Menu Bar Icon Constants
+
+    /// Menu bar icon dimensions matching macOS native input source style
+    private enum MenuBarIconStyle {
+        /// Icon dimensions (matches macOS input source indicator)
+        static let iconWidth: CGFloat = 22
+        static let iconHeight: CGFloat = 16
+        /// Corner radius for the rounded rectangle
+        static let cornerRadius: CGFloat = 4.5
+        /// Stroke width for outline mode
+        static let strokeWidth: CGFloat = 1.25
+        /// Font size for the language label
+        static let fontSize: CGFloat = 11
+        /// Font weight for the language label
+        static let fontWeight: NSFont.Weight = .semibold
+    }
+
     /// Creates a menu bar icon matching macOS native input source style
     /// - Vietnamese mode: "VI" filled (like macOS active input source)
     /// - English mode: "EN" not filled (outline only)
     private static func createMenuBarIcon(isVietnameseMode: Bool) -> NSImage {
-        // Match macOS input source icon: wider rounded rectangle
-        let size = NSSize(width: 22, height: 16)
+        // Fixed icon size matching macOS native input source
+        let iconSize = NSSize(width: MenuBarIconStyle.iconWidth, height: MenuBarIconStyle.iconHeight)
+        // Canvas size: width matches icon, height is standard menu bar working area (22pt)
+        let canvasSize = NSSize(width: iconSize.width, height: 22)
 
-        // Use NSImage with drawing handler for proper scaling on Retina
-        let image = NSImage(size: size, flipped: false) { rect in
+        let image = NSImage(size: canvasSize, flipped: false) { canvasRect in
+            // Center the icon within the 22pt canvas (standard menu bar height)
+            let iconRect = NSRect(
+                x: (canvasRect.width - iconSize.width) / 2,
+                y: (canvasRect.height - iconSize.height) / 2,
+                width: iconSize.width,
+                height: iconSize.height
+            )
+
             if isVietnameseMode {
-                Self.drawFilledIcon(text: "VI", in: rect)
+                Self.drawFilledIcon(text: "VI", in: iconRect)
             } else {
-                Self.drawOutlineIcon(text: "EN", in: rect)
+                Self.drawOutlineIcon(text: "EN", in: iconRect)
             }
             return true
         }
@@ -133,15 +176,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Draws filled icon like macOS native input source (active state)
     /// Uses knockout effect: text is cut out from the filled rectangle
     private static func drawFilledIcon(text: String, in rect: NSRect) {
-        let cornerRadius: CGFloat = 3.5
-
-        // Draw filled rounded rectangle background (full rect, no inset)
-        let bgPath = NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius)
+        // Draw filled rounded rectangle background
+        let bgPath = NSBezierPath(
+            roundedRect: rect,
+            xRadius: MenuBarIconStyle.cornerRadius,
+            yRadius: MenuBarIconStyle.cornerRadius
+        )
         NSColor.black.setFill()
         bgPath.fill()
 
         // Knockout text: use destinationOut compositing to cut text from background
-        let font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        let font = NSFont.systemFont(ofSize: MenuBarIconStyle.fontSize, weight: MenuBarIconStyle.fontWeight)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: NSColor.black,
@@ -159,9 +204,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSGraphicsContext.current?.compositingOperation = .sourceOver
     }
 
-    /// Draws outline icon (inactive state) - text only, no background
+    /// Draws outline icon (inactive state) - rounded rectangle outline with text inside
     private static func drawOutlineIcon(text: String, in rect: NSRect) {
-        let font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        // Inset for stroke (half of stroke width on each side)
+        let insetRect = rect.insetBy(
+            dx: MenuBarIconStyle.strokeWidth / 2,
+            dy: MenuBarIconStyle.strokeWidth / 2
+        )
+
+        // Draw rounded rectangle outline (stroke only, not filled)
+        let outlinePath = NSBezierPath(
+            roundedRect: insetRect,
+            xRadius: MenuBarIconStyle.cornerRadius,
+            yRadius: MenuBarIconStyle.cornerRadius
+        )
+        outlinePath.lineWidth = MenuBarIconStyle.strokeWidth
+        NSColor.black.setStroke()
+        outlinePath.stroke()
+
+        // Draw text centered inside the outline
+        let font = NSFont.systemFont(ofSize: MenuBarIconStyle.fontSize, weight: MenuBarIconStyle.fontWeight)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: NSColor.black,
@@ -326,9 +388,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         NSApp.activate(ignoringOtherApps: true)
-        if let settingsItem = NSApp.mainMenu?.item(withTitle: "LotusKey")?.submenu?.item(withTitle: "Settings…") {
-            NSApp.sendAction(settingsItem.action!, to: settingsItem.target, from: nil)
-        }
+        // Open Settings window using the standard macOS action for Settings scene
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
 
     // MARK: - Helpers
