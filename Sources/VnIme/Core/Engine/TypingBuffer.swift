@@ -60,19 +60,6 @@ public struct TypingBuffer: Sendable {
         append(TypedCharacter(character: char))
     }
 
-    /// Add a character to the buffer and record original keystroke
-    /// - Parameters:
-    ///   - char: The TypedCharacter to add
-    ///   - originalKey: The original key pressed (for restore-on-invalid)
-    /// - Returns: true if successful, false if buffer is full
-    @discardableResult
-    public mutating func append(_ char: TypedCharacter, originalKey: Character) -> Bool {
-        guard !isFull else { return false }
-        characters.append(char)
-        keyStates.append(originalKey)
-        return true
-    }
-
     /// Record an original keystroke without adding a character (for transformation keys)
     public mutating func recordOriginalKey(_ key: Character) {
         guard keyStates.count < Self.maxCapacity else { return }
@@ -102,43 +89,11 @@ public struct TypingBuffer: Sendable {
         characters.last
     }
 
-    /// Get character at index from the end (0 = last)
-    public func fromEnd(_ offset: Int) -> TypedCharacter? {
-        let index = count - 1 - offset
-        guard index >= 0 else { return nil }
-        return characters[index]
-    }
-
     // MARK: - Syllable Structure Analysis
 
     /// Get base characters as array for analysis
     private var baseChars: [Character] {
         characters.compactMap { $0.baseCharacter }
-    }
-
-    /// Find the start index of the vowel nucleus (skipping qu-/gi- consonant clusters)
-    public func findVowelStartIndex() -> Int? {
-        let chars = baseChars
-        guard !chars.isEmpty else { return nil }
-
-        for i in 0..<chars.count {
-            let char = chars[i]
-
-            // Skip 'u' if part of 'qu' cluster
-            if char == "u" && VietnameseConstants.isUPartOfQu(buffer: chars, uIndex: i) {
-                continue
-            }
-
-            // Skip 'i' if part of 'gi' cluster
-            if char == "i" && VietnameseConstants.isIPartOfGi(buffer: chars, iIndex: i) {
-                continue
-            }
-
-            if VietnameseConstants.baseVowels.contains(char) {
-                return i
-            }
-        }
-        return nil
     }
 
     /// Find all vowel positions in the buffer (accounting for qu-/gi- clusters)

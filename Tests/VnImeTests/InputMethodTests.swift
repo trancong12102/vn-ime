@@ -338,4 +338,150 @@ final class InputMethodTests: XCTestCase {
         XCTAssertNil(state.lastTransformation)
         XCTAssertNil(state.tempDisabledKey)
     }
+
+    // MARK: - Edge Case Tests for 100% Coverage
+
+    func testTelexStandaloneWAfterBlocker() {
+        // Test standalone w after blocker character (should return nil)
+        let telex = TelexInputMethod()
+
+        // w after 'w' (blocker) → nil
+        let wwResult = telex.processCharacter("w", context: "w")
+        XCTAssertNil(wwResult, "w after blocker 'w' should return nil")
+
+        // w after 'f' (blocker) → nil
+        let fwResult = telex.processCharacter("w", context: "f")
+        XCTAssertNil(fwResult, "w after blocker 'f' should return nil")
+    }
+
+    func testTelexStandaloneHornUndoAttemptReturnsNil() {
+        // Test undo attempt on standaloneHorn - should fall through to return nil
+        // The standaloneHorn case breaks, falls through to return nil, then normal processing continues
+        let telex = TelexInputMethod()
+        var state = InputMethodState()
+
+        // Set lastTransformation to standaloneHorn
+        state.lastTransformation = LastTransformation(type: .standaloneHorn, triggerKey: "[", originalChars: "")
+
+        // Try pressing [ again with context ending in a vowel
+        // The checkForUndo will match the trigger key, enter standaloneHorn case,
+        // break (do nothing), and fall through to return nil from checkForUndo
+        // Then normal [ handling proceeds
+        let undoResult = telex.processCharacter("[", context: "a", state: &state)
+        // After standaloneHorn undo check fails, it should return nil from checkForUndo
+        // Then handleBracketKey is called, which returns nil for bracket after vowel
+        XCTAssertNil(undoResult, "standaloneHorn undo falls through to nil, then bracket after vowel is nil")
+    }
+
+    func testTelexDisabledKeyReturnsNil() {
+        let telex = TelexInputMethod()
+        var state = InputMethodState()
+
+        // Disable the 's' key
+        state.disableKey("s")
+
+        // Try to use 's' key - should return nil
+        let result = telex.processCharacter("s", context: "a", state: &state)
+        XCTAssertNil(result, "Disabled key should return nil")
+    }
+
+    func testSimpleTelexDisabledKeyReturnsNil() {
+        let simpleTelex = SimpleTelexInputMethod()
+        var state = InputMethodState()
+
+        // Disable the 'w' key
+        state.disableKey("w")
+
+        // Try to use 'w' key - should return nil
+        let result = simpleTelex.processCharacter("w", context: "a", state: &state)
+        XCTAssertNil(result, "Disabled key should return nil in Simple Telex")
+    }
+
+    func testSimpleTelexUndoWithNonMatchingKey() {
+        // Test undo detection when key doesn't match trigger
+        let simpleTelex = SimpleTelexInputMethod()
+        var state = InputMethodState()
+
+        // First apply breve transformation
+        let breveResult = simpleTelex.processCharacter("w", context: "a", state: &state)
+        XCTAssertNotNil(breveResult, "aw should produce breve")
+
+        // Now simulate that the transformation was applied, set lastTransformation
+        state.lastTransformation = LastTransformation(type: .breve, triggerKey: "w", originalChars: "a")
+
+        // Try pressing a different key (not 'w') - should not undo
+        let differentKeyResult = simpleTelex.processCharacter("s", context: "ă", state: &state)
+        // This should NOT be an undo, just normal processing
+        XCTAssertNotNil(differentKeyResult, "'s' after 'ă' should be normal tone processing")
+    }
+
+    func testSimpleTelexUndoWithNonBreveType() {
+        // Test undo detection when type is not breve (Simple Telex only undoes breve)
+        // Note: Simple Telex delegates to Telex for non-W keys, and Telex has its own undo logic
+        let simpleTelex = SimpleTelexInputMethod()
+        var state = InputMethodState()
+
+        // Set lastTransformation to circumflex (not breve)
+        // But use a non-matching key to test the checkForUndo mismatch path
+        state.lastTransformation = LastTransformation(type: .circumflex, triggerKey: "a", originalChars: "a")
+
+        // Simple Telex's checkForUndo only handles breve
+        // When we press 'w' (not 'a'), the guard char == triggerLower fails
+        // This covers line 70 (return nil when char doesn't match trigger)
+        let result = simpleTelex.processCharacter("w", context: "â", state: &state)
+        // w after â doesn't match any pattern, should return nil
+        XCTAssertNil(result, "w after â should return nil in Simple Telex")
+    }
+
+    // MARK: - InputMethod Protocol Default Implementation Tests
+
+    func testInputMethodStateResetTempDisabled() {
+        var state = InputMethodState()
+        state.disableKey("a")
+        XCTAssertTrue(state.isDisabled("a"))
+
+        state.resetTempDisabled()
+        XCTAssertFalse(state.isDisabled("a"))
+    }
+
+    // MARK: - InputMethodRegistry Additional Tests
+
+    func testRegistryAllMethods() {
+        let allMethods = InputMethodRegistry.allMethods
+        XCTAssertEqual(allMethods.count, 2)
+
+        let names = allMethods.map { $0.method.name }
+        XCTAssertTrue(names.contains("Telex"))
+        XCTAssertTrue(names.contains("Simple Telex"))
+    }
+
+    func testRegistryGetByName() {
+        // Test getByName with exact name
+        let telex = InputMethodRegistry.getByName("Telex")
+        XCTAssertNotNil(telex)
+        XCTAssertEqual(telex?.name, "Telex")
+
+        let simpleTelex = InputMethodRegistry.getByName("Simple Telex")
+        XCTAssertNotNil(simpleTelex)
+        XCTAssertEqual(simpleTelex?.name, "Simple Telex")
+    }
+
+    func testRegistryGetByNameCaseInsensitive() {
+        let telexLower = InputMethodRegistry.getByName("telex")
+        XCTAssertNotNil(telexLower)
+
+        let telexUpper = InputMethodRegistry.getByName("TELEX")
+        XCTAssertNotNil(telexUpper)
+
+        let simpleTelexMixed = InputMethodRegistry.getByName("simple telex")
+        XCTAssertNotNil(simpleTelexMixed)
+    }
+
+    func testRegistryGetByNameInvalid() {
+        let vni = InputMethodRegistry.getByName("VNI")
+        XCTAssertNil(vni)
+
+        let invalid = InputMethodRegistry.getByName("invalid")
+        XCTAssertNil(invalid)
+    }
 }

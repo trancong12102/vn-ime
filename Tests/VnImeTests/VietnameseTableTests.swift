@@ -168,4 +168,28 @@ final class VietnameseTableTests: XCTestCase {
         typed.state.insert(mark)
         return VietnameseTable.toUnicode(typed)
     }
+
+    // MARK: - UnicodeCharacterTable Tests
+
+    func testUnicodeCharacterTableEncode() {
+        let table = UnicodeCharacterTable()
+        XCTAssertEqual(table.name, "Unicode")
+        XCTAssertEqual(table.encode("a"), "a")
+        XCTAssertEqual(table.encode("á"), "á")
+        XCTAssertEqual(table.encode("ả"), "ả")
+    }
+
+    func testUnicodeCharacterTableDecode() {
+        let table = UnicodeCharacterTable()
+        XCTAssertEqual(table.decode("a"), "a")
+        XCTAssertEqual(table.decode("abc"), "a")  // Returns first character
+        XCTAssertNil(table.decode(""))  // Empty string returns nil
+    }
+
+    func testUnicodeCharacterTableSupports() {
+        let table = UnicodeCharacterTable()
+        XCTAssertTrue(table.supports("a"))
+        XCTAssertTrue(table.supports("á"))
+        XCTAssertTrue(table.supports("😀"))  // Supports any character
+    }
 }

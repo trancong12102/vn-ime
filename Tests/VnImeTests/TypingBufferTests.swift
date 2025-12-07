@@ -601,4 +601,77 @@ final class TypingBufferTests: XCTestCase {
         }
         XCTAssertEqual(chars, ["a", "b", "c"])
     }
+
+    // MARK: - TypedCharacter Tests
+
+    func testTypedCharacterInitWithBaseCodeAndState() {
+        // Test init(baseCode:state:)
+        let state: CharacterState = [.caps, .acute]
+        let typed = TypedCharacter(baseCode: 97, state: state)  // 'a' = 97
+        XCTAssertEqual(typed.baseCode, 97)
+        XCTAssertEqual(typed.state, state)
+        XCTAssertEqual(typed.baseCharacter, "a")
+        XCTAssertTrue(typed.isUppercase)
+    }
+
+    func testTypedCharacterRawValueRoundTrip() {
+        // Test init(rawValue:) and rawValue computed property
+        let original = TypedCharacter(baseCode: 97, state: [.caps, .acute])
+        let rawValue = original.rawValue
+
+        // Verify raw value packing
+        XCTAssertEqual(rawValue & 0xFFFF, 97)  // Base code in lower 16 bits
+
+        // Verify round-trip
+        let unpacked = TypedCharacter(rawValue: rawValue)
+        XCTAssertEqual(unpacked.baseCode, original.baseCode)
+        XCTAssertEqual(unpacked.state, original.state)
+    }
+
+    func testTypedCharacterDescription() {
+        let typed = TypedCharacter(character: "a", caps: true)
+        let description = typed.description
+        XCTAssertTrue(description.contains("TypedCharacter"))
+        XCTAssertTrue(description.contains("a"))
+        XCTAssertTrue(description.contains("caps"))
+    }
+
+    func testTypedCharacterDescriptionWithUnknownChar() {
+        // Test description when baseCode is 0 (no valid character)
+        let typed = TypedCharacter(baseCode: 0, state: [])
+        let description = typed.description
+        XCTAssertTrue(description.contains("?"))
+    }
+
+    // MARK: - VietnameseConstants Tests
+
+    func testVietnameseConstantsIsVowel() {
+        // Test static isVowel function
+        XCTAssertTrue(VietnameseConstants.isVowel("a"))
+        XCTAssertTrue(VietnameseConstants.isVowel("e"))
+        XCTAssertTrue(VietnameseConstants.isVowel("i"))
+        XCTAssertTrue(VietnameseConstants.isVowel("o"))
+        XCTAssertTrue(VietnameseConstants.isVowel("u"))
+        XCTAssertTrue(VietnameseConstants.isVowel("y"))
+        XCTAssertTrue(VietnameseConstants.isVowel("A"))  // uppercase
+        XCTAssertFalse(VietnameseConstants.isVowel("b"))
+        XCTAssertFalse(VietnameseConstants.isVowel("x"))
+    }
+
+    func testVietnameseConstantsIsConsonant() {
+        // Test static isConsonant function
+        XCTAssertTrue(VietnameseConstants.isConsonant("b"))
+        XCTAssertTrue(VietnameseConstants.isConsonant("c"))
+        XCTAssertTrue(VietnameseConstants.isConsonant("d"))
+        XCTAssertTrue(VietnameseConstants.isConsonant("B"))  // uppercase
+        XCTAssertFalse(VietnameseConstants.isConsonant("a"))
+        XCTAssertFalse(VietnameseConstants.isConsonant("e"))
+    }
+
+    func testVietnameseConstantsIsValidToneWithEndingNoTone() {
+        // Test when tone is empty (no mark) - should return true
+        let noTone: CharacterState = []
+        XCTAssertTrue(VietnameseConstants.isValidToneWithEnding(tone: noTone, ending: "c"))
+        XCTAssertTrue(VietnameseConstants.isValidToneWithEnding(tone: noTone, ending: "m"))
+    }
 }

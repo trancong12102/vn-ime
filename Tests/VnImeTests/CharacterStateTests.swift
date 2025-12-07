@@ -132,6 +132,26 @@ final class CharacterStateTests: XCTestCase {
         XCTAssertEqual(CharacterState.dotBelow.rawValue, 0x800000)    // bit 23
     }
 
+    // MARK: - Modifier Property
+
+    func testModifierReturnsNilWhenNoModifierPresent() {
+        let state = CharacterState()
+        XCTAssertNil(state.modifier)
+
+        let stateWithToneMark: CharacterState = [.acute]
+        XCTAssertNil(stateWithToneMark.modifier)
+    }
+
+    func testModifierReturnsCircumflexWhenCircumflexPresent() {
+        let state: CharacterState = [.circumflex]
+        XCTAssertEqual(state.modifier, .circumflex)
+    }
+
+    func testModifierReturnsHornOrBreveWhenPresent() {
+        let state: CharacterState = [.hornOrBreve]
+        XCTAssertEqual(state.modifier, .hornOrBreve)
+    }
+
     // MARK: - Description
 
     func testDescription() {
@@ -139,5 +159,22 @@ final class CharacterStateTests: XCTestCase {
         let description = state.description
         XCTAssertTrue(description.contains("caps"))
         XCTAssertTrue(description.contains("sắc"))
+    }
+
+    func testDescriptionEmpty() {
+        let state = CharacterState()
+        XCTAssertEqual(state.description, "[]")
+    }
+
+    func testDescriptionAllFlags() {
+        let state: CharacterState = [.caps, .circumflex, .hornOrBreve, .stroke, .acute, .standalone, .isCharCode]
+        let description = state.description
+        XCTAssertTrue(description.contains("caps"))
+        XCTAssertTrue(description.contains("^"))
+        XCTAssertTrue(description.contains("w"))
+        XCTAssertTrue(description.contains("đ"))
+        XCTAssertTrue(description.contains("sắc"))
+        XCTAssertTrue(description.contains("standalone"))
+        XCTAssertTrue(description.contains("charCode"))
     }
 }

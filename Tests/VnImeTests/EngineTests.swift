@@ -812,6 +812,20 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(result, "cc", "cc with Quick Telex disabled should stay 'cc'")
     }
 
+    func testQuickTelexProcessShortcutDirectlyWhenDisabled() {
+        // Test processShortcut directly to cover the guard else branch
+        engine.quickTelex.isEnabled = false
+        let result = engine.quickTelex.processShortcut("c", previousCharacter: "c")
+        XCTAssertNil(result, "processShortcut should return nil when disabled")
+    }
+
+    func testQuickTelexProcessShortcutWithNilPreviousCharacter() {
+        // Test processShortcut with nil previousCharacter to cover the guard else branch
+        engine.quickTelex.isEnabled = true
+        let result = engine.quickTelex.processShortcut("c", previousCharacter: nil)
+        XCTAssertNil(result, "processShortcut should return nil when previousCharacter is nil")
+    }
+
     func testQuickTelexInWord() {
         engine.quickTelex.isEnabled = true
         let result = engine.processString("cca")
