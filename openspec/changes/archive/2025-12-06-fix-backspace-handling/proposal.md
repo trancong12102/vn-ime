@@ -15,8 +15,8 @@ Backspace handling is broken - pressing backspace after typing Vietnamese text (
 
 - Affected specs: `core-engine` (State History for Undo, Delete key handling)
 - Affected code:
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift:527-569` (handleBackspace)
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift:571-600` (history management)
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift:527-569` (handleBackspace)
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift:571-600` (history management)
 
 ## Problem Analysis
 
@@ -132,7 +132,7 @@ OpenKey calls `checkGrammar(1)` after backspace (line 1463):
 }
 ```
 
-VnIme should maintain spell checking consistency after backspace too.
+LotusKey should maintain spell checking consistency after backspace too.
 
 ### Issue 5: previousOutputLength Tracking
 

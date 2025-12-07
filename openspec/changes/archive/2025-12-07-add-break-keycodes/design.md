@@ -219,8 +219,8 @@ static vector<Uint8> _breakCode = {
     KEY_RIGHT,      // 124
     KEY_DOWN,       // 125
     KEY_UP,         // 126
-    KEY_COMMA,      // 43 (character-based in VnIme)
-    KEY_DOT,        // 47 (character-based in VnIme)
+    KEY_COMMA,      // 43 (character-based in LotusKey)
+    KEY_DOT,        // 47 (character-based in LotusKey)
     // ... more punctuation keycodes
 };
 ```

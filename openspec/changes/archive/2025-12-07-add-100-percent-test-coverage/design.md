@@ -2,7 +2,7 @@
 
 ## Context
 
-VnIme là Vietnamese input method cho macOS với yêu cầu nghiêm ngặt về chất lượng code. Logic components xử lý việc chuyển đổi keystroke thành Vietnamese text - bất kỳ bug nào đều ảnh hưởng trực tiếp đến người dùng.
+LotusKey là Vietnamese input method cho macOS với yêu cầu nghiêm ngặt về chất lượng code. Logic components xử lý việc chuyển đổi keystroke thành Vietnamese text - bất kỳ bug nào đều ảnh hưởng trực tiếp đến người dùng.
 
 ### Stakeholders
 - Developers: Cần confidence khi refactoring

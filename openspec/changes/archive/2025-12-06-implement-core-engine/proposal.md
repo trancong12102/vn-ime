@@ -19,9 +19,9 @@ Spec `core-engine` đã được định nghĩa với 5 requirements, nhưng `De
 
 - **Affected specs**: `core-engine` (implementation only, no spec changes needed)
 - **Affected code**:
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift` (modify)
-  - `Sources/VnIme/Core/Engine/TypingBuffer.swift` (new)
-  - `Sources/VnIme/Core/Engine/CharacterState.swift` (new)
-  - `Tests/VnImeTests/EngineTests.swift` (expand)
-  - `Tests/VnImeTests/TypingBufferTests.swift` (new)
-  - `Tests/VnImeTests/CharacterStateTests.swift` (new)
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift` (modify)
+  - `Sources/LotusKey/Core/Engine/TypingBuffer.swift` (new)
+  - `Sources/LotusKey/Core/Engine/CharacterState.swift` (new)
+  - `Tests/LotusKeyTests/EngineTests.swift` (expand)
+  - `Tests/LotusKeyTests/TypingBufferTests.swift` (new)
+  - `Tests/LotusKeyTests/CharacterStateTests.swift` (new)

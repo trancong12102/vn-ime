@@ -3,35 +3,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "VnIme",
+    name: "LotusKey",
     platforms: [
         .macOS(.v15)
     ],
     products: [
         .executable(
-            name: "VnIme",
-            targets: ["VnIme"]
+            name: "LotusKey",
+            targets: ["LotusKey"]
         )
     ],
     dependencies: [],
     targets: [
         .executableTarget(
-            name: "VnIme",
+            name: "LotusKey",
             dependencies: [],
-            path: "Sources/VnIme",
+            path: "Sources/LotusKey",
             resources: [
                 .process("Resources")
             ]
         ),
         .testTarget(
-            name: "VnImeTests",
-            dependencies: ["VnIme"],
-            path: "Tests/VnImeTests"
+            name: "LotusKeyTests",
+            dependencies: ["LotusKey"],
+            path: "Tests/LotusKeyTests"
         ),
         .testTarget(
-            name: "VnImeUITests",
-            dependencies: ["VnIme"],
-            path: "Tests/VnImeUITests"
+            name: "LotusKeyUITests",
+            dependencies: ["LotusKey"],
+            path: "Tests/LotusKeyUITests"
         )
     ]
 )

@@ -26,7 +26,7 @@ This leaves Vietnamese syllable validation non-functional, meaning users receive
 
 - Affected specs: `spell-checking`
 - Affected code:
-  - `Sources/VnIme/Core/Spelling/SpellChecker.swift` - Main implementation
-  - `Sources/VnIme/Core/Engine/TypedCharacter.swift` - May add vowel combination constants
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift` - Integration with spell checker
-  - `Tests/VnImeTests/SpellCheckerTests.swift` - New test file
+  - `Sources/LotusKey/Core/Spelling/SpellChecker.swift` - Main implementation
+  - `Sources/LotusKey/Core/Engine/TypedCharacter.swift` - May add vowel combination constants
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift` - Integration with spell checker
+  - `Tests/LotusKeyTests/SpellCheckerTests.swift` - New test file

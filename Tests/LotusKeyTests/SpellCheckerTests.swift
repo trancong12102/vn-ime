@@ -1,5 +1,5 @@
 import Testing
-@testable import VnIme
+@testable import LotusKey
 
 /// Tests for Vietnamese spell checking and syllable parsing
 struct SpellCheckerTests {

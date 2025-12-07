@@ -33,8 +33,8 @@ The project currently targets macOS 13.0+ (Ventura). Updating to macOS 15.0+ (Se
 - **Affected specs**: `project-structure`
 - **Affected files**:
   - `Package.swift` - Platform and Swift version updates
-  - `Sources/VnIme/UI/AccessibilityPermissionView.swift` - Observable migration
-  - `Sources/VnIme/App/AppDelegate.swift` - Remove availability checks
+  - `Sources/LotusKey/UI/AccessibilityPermissionView.swift` - Observable migration
+  - `Sources/LotusKey/App/AppDelegate.swift` - Remove availability checks
   - `openspec/project.md` - Documentation updates
 
 ## Risk Assessment

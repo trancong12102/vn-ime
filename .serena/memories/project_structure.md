@@ -3,7 +3,7 @@
 ## Directory Layout
 
 ```
-vn-ime/
+lotus-key/
 ├── Package.swift           # Swift Package Manager manifest
 ├── CLAUDE.md               # AI assistant instructions
 ├── README.md               # Project documentation
@@ -12,9 +12,9 @@ vn-ime/
 ├── .gitmodules             # Git submodules (OpenKey reference)
 │
 ├── Sources/
-│   └── VnIme/
+│   └── LotusKey/
 │       ├── App/                    # Entry point, AppDelegate
-│       │   ├── VnImeApp.swift      # @main SwiftUI App entry
+│       │   ├── LotusKeyApp.swift   # @main SwiftUI App entry
 │       │   ├── AppDelegate.swift   # NSApplicationDelegate
 │       │   └── AppLifecycleManager.swift
 │       │
@@ -38,12 +38,12 @@ vn-ime/
 │       └── Resources/              # Assets, localization
 │
 ├── Tests/
-│   ├── VnImeTests/                 # Unit tests
+│   ├── LotusKeyTests/              # Unit tests
 │   │   ├── EngineTests.swift
 │   │   ├── InputMethodTests.swift
 │   │   ├── SpellCheckerTests.swift
 │   │   └── ...
-│   └── VnImeUITests/               # UI tests
+│   └── LotusKeyUITests/            # UI tests
 │
 ├── OpenKey/                        # Reference implementation (git submodule)
 │
@@ -65,19 +65,19 @@ vn-ime/
 ## Key Files
 
 ### Entry Points
-- `Sources/VnIme/App/VnImeApp.swift` - Main app entry (@main)
-- `Sources/VnIme/App/AppDelegate.swift` - App lifecycle management
+- `Sources/LotusKey/App/LotusKeyApp.swift` - Main app entry (@main)
+- `Sources/LotusKey/App/AppDelegate.swift` - App lifecycle management
 
 ### Core Engine
-- `Sources/VnIme/Core/Engine/VietnameseEngine.swift` - Main engine protocol and implementation
-- `Sources/VnIme/Core/Engine/TypingBuffer.swift` - Buffer for current word
-- `Sources/VnIme/Core/InputMethods/` - Input method implementations (Telex, etc.)
+- `Sources/LotusKey/Core/Engine/VietnameseEngine.swift` - Main engine protocol and implementation
+- `Sources/LotusKey/Core/Engine/TypingBuffer.swift` - Buffer for current word
+- `Sources/LotusKey/Core/InputMethods/` - Input method implementations (Telex, etc.)
 
 ### Event Handling
-- `Sources/VnIme/EventHandling/` - CGEventTap keyboard hook
+- `Sources/LotusKey/EventHandling/` - CGEventTap keyboard hook
 
 ### UI
-- `Sources/VnIme/UI/` - SwiftUI settings views and menu bar
+- `Sources/LotusKey/UI/` - SwiftUI settings views and menu bar
 
 ### Configuration
 - `Package.swift` - SPM dependencies and targets
@@ -86,8 +86,8 @@ vn-ime/
 ## Module Architecture
 
 ```
-VnIme (executable target)
-├── @main VnImeApp
+LotusKey (executable target)
+├── @main LotusKeyApp
 ├── AppDelegate
 │   └── Sets up event tap, menu bar, lifecycle
 │

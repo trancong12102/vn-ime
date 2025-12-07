@@ -1,19 +1,19 @@
 /*
   Localizable.strings
-  VnIme
+  LotusKey
 
   Vietnamese Input Method for macOS
 */
 
 // MARK: - App General
-"app.name" = "VnIme";
+"app.name" = "LotusKey";
 "app.version" = "Version %@";
 
 // MARK: - Menu Bar
 "menu.vietnamese" = "Tiếng Việt";
 "menu.english" = "English";
 "menu.settings" = "Cài đặt...";
-"menu.quit" = "Thoát VnIme";
+"menu.quit" = "Thoát LotusKey";
 
 // MARK: - Settings - General
 "settings.general" = "Chung";
@@ -36,7 +36,7 @@
 "settings.about.license" = "Giấy phép GPL-3.0";
 
 // MARK: - Accessibility
-"accessibility.description" = "VnIme cần quyền truy cập để nhận sự kiện bàn phím và hỗ trợ gõ tiếng Việt.";
+"accessibility.description" = "LotusKey cần quyền truy cập để nhận sự kiện bàn phím và hỗ trợ gõ tiếng Việt.";
 
 // MARK: - Errors
 "error.accessibilityNotEnabled" = "Vui lòng bật quyền truy cập trong Cài đặt hệ thống > Riêng tư & Bảo mật > Trợ năng";

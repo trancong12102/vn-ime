@@ -110,14 +110,14 @@ if (backspaceCount > 0) {
 
 - **Affected specs**: `event-handling`
 - **Affected code**:
-  - `Sources/VnIme/EventHandling/KeyboardEventHandler.swift` (major changes)
-  - `Sources/VnIme/App/AppDelegate.swift` (wire up handler, share event source)
-  - New: `Sources/VnIme/EventHandling/ApplicationDetector.swift`
-  - New: `Sources/VnIme/EventHandling/TextInjector.swift`
-  - New: `Sources/VnIme/EventHandling/HotkeyDetector.swift`
-  - New: `Sources/VnIme/EventHandling/KeyboardLayoutConverter.swift`
-  - New: `Sources/VnIme/EventHandling/InputSourceDetector.swift`
-  - New: `Sources/VnIme/UI/AccessibilityPermissionView.swift`
+  - `Sources/LotusKey/EventHandling/KeyboardEventHandler.swift` (major changes)
+  - `Sources/LotusKey/App/AppDelegate.swift` (wire up handler, share event source)
+  - New: `Sources/LotusKey/EventHandling/ApplicationDetector.swift`
+  - New: `Sources/LotusKey/EventHandling/TextInjector.swift`
+  - New: `Sources/LotusKey/EventHandling/HotkeyDetector.swift`
+  - New: `Sources/LotusKey/EventHandling/KeyboardLayoutConverter.swift`
+  - New: `Sources/LotusKey/EventHandling/InputSourceDetector.swift`
+  - New: `Sources/LotusKey/UI/AccessibilityPermissionView.swift`
 - **Dependencies**: None (uses only Apple frameworks: Carbon, AppKit, InputMethodKit)
 - **Breaking changes**: None (additive changes only)
 

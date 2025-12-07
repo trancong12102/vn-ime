@@ -98,7 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Quit
         menu.addItem(
-            NSMenuItem(title: "Quit VnIme", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+            NSMenuItem(title: "Quit LotusKey", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
         statusItem?.menu = menu
     }
@@ -221,7 +221,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try handler.start()
         } catch {
             print("Failed to start event handler: \(error.localizedDescription)")
-            showError("Failed to start VnIme: \(error.localizedDescription)")
+            showError("Failed to start LotusKey: \(error.localizedDescription)")
             return
         }
 
@@ -279,7 +279,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             .store(in: &cancellables)
 
-        print("VnIme event handler started successfully")
+        print("LotusKey event handler started successfully")
     }
 
     // MARK: - Settings Handling
@@ -326,7 +326,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         NSApp.activate(ignoringOtherApps: true)
-        if let settingsItem = NSApp.mainMenu?.item(withTitle: "VnIme")?.submenu?.item(withTitle: "Settings…") {
+        if let settingsItem = NSApp.mainMenu?.item(withTitle: "LotusKey")?.submenu?.item(withTitle: "Settings…") {
             NSApp.sendAction(settingsItem.action!, to: settingsItem.target, from: nil)
         }
     }
@@ -335,7 +335,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showError(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "VnIme Error"
+        alert.messageText = "LotusKey Error"
         alert.informativeText = message
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")

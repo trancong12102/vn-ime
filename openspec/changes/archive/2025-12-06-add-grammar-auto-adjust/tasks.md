@@ -2,7 +2,7 @@
 
 ## 1. Research & Analysis
 - [x] 1.1 Analyze OpenKey `checkGrammar()` function (Engine.cpp:290-347)
-- [x] 1.2 Analyze VnIme current "uo" pattern handling (VietnameseEngine:451-456)
+- [x] 1.2 Analyze LotusKey current "uo" pattern handling (VietnameseEngine:451-456)
 - [x] 1.3 Identify actual gap: non-standard typing orders (thuwon, nưoc)
 - [x] 1.4 Document XOR logic for modifier auto-correction
 

@@ -20,13 +20,13 @@ Core engine is complete but input method layer lacks critical features: undo tra
 
 - Affected specs: `input-methods`
 - Affected code:
-  - `Sources/VnIme/Core/InputMethods/TelexInputMethod.swift`
-  - `Sources/VnIme/Core/InputMethods/InputMethod.swift`
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift`
-  - `Sources/VnIme/Features/QuickTelex.swift` (integration)
+  - `Sources/LotusKey/Core/InputMethods/TelexInputMethod.swift`
+  - `Sources/LotusKey/Core/InputMethods/InputMethod.swift`
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift`
+  - `Sources/LotusKey/Features/QuickTelex.swift` (integration)
 - New files:
-  - `Sources/VnIme/Core/InputMethods/SimpleTelexInputMethod.swift`
-  - `Sources/VnIme/Core/InputMethods/InputMethodRegistry.swift`
+  - `Sources/LotusKey/Core/InputMethods/SimpleTelexInputMethod.swift`
+  - `Sources/LotusKey/Core/InputMethods/InputMethodRegistry.swift`
 
 ## Non-Goals (Future Changes)
 

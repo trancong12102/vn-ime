@@ -11,7 +11,7 @@ This occurs because the current engine implementation uses a "replace entire buf
 
 ## Root Cause Analysis
 
-### Current Behavior (vn-ime)
+### Current Behavior (lotus-key)
 
 The `generateResult()` function in `VietnameseEngine.swift` always returns `.replace()` when the buffer has more than one character:
 

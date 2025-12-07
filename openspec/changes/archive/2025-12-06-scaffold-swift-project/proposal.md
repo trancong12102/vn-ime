@@ -7,7 +7,7 @@ The project currently lacks a Swift codebase structure. OpenKey Swift needs a pr
 ## What Changes
 
 - Create `Package.swift` with Swift 5.9+ configuration targeting macOS 13+
-- Scaffold `Sources/VnIme/` directory tree matching `project.md` architecture:
+- Scaffold `Sources/LotusKey/` directory tree matching `project.md` architecture:
   - `App/` - Entry point, AppDelegate
   - `Core/Engine/`, `Core/InputMethods/`, `Core/CharacterTables/`, `Core/Spelling/`
   - `EventHandling/` - CGEventTap, keyboard hook
@@ -16,8 +16,8 @@ The project currently lacks a Swift codebase structure. OpenKey Swift needs a pr
   - `Storage/` - UserDefaults, settings
   - `Utilities/` - Extensions, helpers
 - Scaffold test directories:
-  - `Tests/VnImeTests/` - Unit tests
-  - `Tests/VnImeUITests/` - UI tests
+  - `Tests/LotusKeyTests/` - Unit tests
+  - `Tests/LotusKeyUITests/` - UI tests
 - Add stub files with placeholder implementations
 - Create `Resources/` directory with asset catalog structure
 - Add `.swiftlint.yml` for code style enforcement

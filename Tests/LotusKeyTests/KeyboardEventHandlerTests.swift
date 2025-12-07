@@ -1,5 +1,5 @@
 import XCTest
-@testable import VnIme
+@testable import LotusKey
 
 final class KeyboardEventHandlerTests: XCTestCase {
     // MARK: - FlagsChanged Logic Tests

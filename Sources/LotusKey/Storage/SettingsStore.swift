@@ -3,18 +3,18 @@ import Foundation
 
 /// Keys for UserDefaults storage
 public enum SettingsKey: String {
-    case inputMethod = "VnImeInputMethod"
-    case spellCheckEnabled = "VnImeSpellCheckEnabled"
-    case smartSwitchEnabled = "VnImeSmartSwitchEnabled"
-    case quickTelexEnabled = "VnImeQuickTelexEnabled"
-    case launchAtLogin = "VnImeLaunchAtLogin"
-    case showDockIcon = "VnImeShowDockIcon"
-    case autoCapitalize = "VnImeAutoCapitalize"
-    case restoreIfWrongSpelling = "VnImeRestoreIfWrongSpelling"
+    case inputMethod = "LotusKeyInputMethod"
+    case spellCheckEnabled = "LotusKeySpellCheckEnabled"
+    case smartSwitchEnabled = "LotusKeySmartSwitchEnabled"
+    case quickTelexEnabled = "LotusKeyQuickTelexEnabled"
+    case launchAtLogin = "LotusKeyLaunchAtLogin"
+    case showDockIcon = "LotusKeyShowDockIcon"
+    case autoCapitalize = "LotusKeyAutoCapitalize"
+    case restoreIfWrongSpelling = "LotusKeyRestoreIfWrongSpelling"
     // Advanced settings
-    case fixBrowserAutocomplete = "VnImeFixBrowserAutocomplete"
-    case fixChromiumBrowser = "VnImeFixChromiumBrowser"
-    case sendKeyStepByStep = "VnImeSendKeyStepByStep"
+    case fixBrowserAutocomplete = "LotusKeyFixBrowserAutocomplete"
+    case fixChromiumBrowser = "LotusKeyFixChromiumBrowser"
+    case sendKeyStepByStep = "LotusKeySendKeyStepByStep"
 }
 
 /// Protocol for settings storage

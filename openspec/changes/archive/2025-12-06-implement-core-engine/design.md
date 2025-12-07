@@ -290,7 +290,7 @@ enum VietnameseTable {
 
 ## Comparison with Other Engines
 
-| Feature | VnIme | OpenKey | bamboo-core | ibus-unikey |
+| Feature | LotusKey | OpenKey | bamboo-core | ibus-unikey |
 |---------|-------|---------|-------------|-------------|
 | Language | Swift | C++ | Go | C++ |
 | Buffer | `[TypedCharacter]` | `Uint32[32]` bit-packed | `[]*Transformation` | Structured buffer |

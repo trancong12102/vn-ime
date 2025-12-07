@@ -8,8 +8,8 @@ The project SHALL use Swift Package Manager as the build system with a `Package.
 
 - **WHEN** the package is initialized
 - **THEN** it SHALL target Swift 6.2+ and macOS 15.0+ (Sequoia)
-- **AND** it SHALL define an executable target named `VnIme`
-- **AND** it SHALL define test targets `VnImeTests` and `VnImeUITests`
+- **AND** it SHALL define an executable target named `LotusKey`
+- **AND** it SHALL define test targets `LotusKeyTests` and `LotusKeyUITests`
 - **AND** it SHALL use Swift 6 language mode with complete concurrency checking (default in Swift 6.x)
 
 #### Scenario: No external dependencies

@@ -2,7 +2,7 @@
 
 ## 1. Create AppLifecycleManager
 
-- [x] 1.1 Create `Sources/VnIme/App/AppLifecycleManager.swift`
+- [x] 1.1 Create `Sources/LotusKey/App/AppLifecycleManager.swift`
 - [x] 1.2 Implement `LaunchAtLoginManager` using `SMAppService.mainAppService`
   - [x] 1.2.1 Add `register()` method with error handling
   - [x] 1.2.2 Add `unregister()` method with error handling

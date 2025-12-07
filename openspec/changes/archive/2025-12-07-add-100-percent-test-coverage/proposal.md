@@ -2,7 +2,7 @@
 
 ## Why
 
-Logic components của VnIme là phần xử lý cốt lõi của Vietnamese input method - bất kỳ bug nào ở đây sẽ ảnh hưởng trực tiếp đến trải nghiệm gõ tiếng Việt của người dùng. Hiện tại test coverage của các logic components dao động từ 18% đến 96%, cần đạt 100% để đảm bảo:
+Logic components của LotusKey là phần xử lý cốt lõi của Vietnamese input method - bất kỳ bug nào ở đây sẽ ảnh hưởng trực tiếp đến trải nghiệm gõ tiếng Việt của người dùng. Hiện tại test coverage của các logic components dao động từ 18% đến 96%, cần đạt 100% để đảm bảo:
 - Mọi code path đều được kiểm tra
 - Refactoring an toàn trong tương lai
 - Phát hiện regression sớm
@@ -27,7 +27,7 @@ Logic components của VnIme là phần xử lý cốt lõi của Vietnamese inp
 | CharacterTable.swift | 18.18% | 100% | 9 |
 
 ### Non-Logic Components (NOT in scope - UI can skip coverage)
-- App/ (AppDelegate, VnImeApp, AppLifecycleManager)
+- App/ (AppDelegate, LotusKeyApp, AppLifecycleManager)
 - EventHandling/ (CGEventTap, keyboard hooks)
 - UI/ (SettingsView, MenuBarController)
 - Storage/ (SettingsStore)
@@ -36,7 +36,7 @@ Logic components của VnIme là phần xử lý cốt lõi của Vietnamese inp
 ## Impact
 
 - Affected specs: `core-engine`, `input-methods`, `spell-checking`
-- Affected code: `Tests/VnImeTests/`
+- Affected code: `Tests/LotusKeyTests/`
 - New test files may be created for comprehensive coverage
 
 ## Approach

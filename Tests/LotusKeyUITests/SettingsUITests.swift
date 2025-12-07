@@ -1,5 +1,5 @@
 import XCTest
-@testable import VnIme
+@testable import LotusKey
 
 final class SettingsUITests: XCTestCase {
     // NOTE: UI tests require running in Xcode with a proper application target.

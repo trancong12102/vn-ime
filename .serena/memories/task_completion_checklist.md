@@ -1,6 +1,6 @@
 # Task Completion Checklist
 
-When completing a task in VnIme, follow this checklist:
+When completing a task in LotusKey, follow this checklist:
 
 ## Before Committing
 
@@ -99,5 +99,5 @@ For code in event handling path:
 - UI tests for settings panel, menu bar actions
 
 ### Test File Locations
-- Unit tests: `Tests/VnImeTests/`
-- UI tests: `Tests/VnImeUITests/`
+- Unit tests: `Tests/LotusKeyTests/`
+- UI tests: `Tests/LotusKeyUITests/`

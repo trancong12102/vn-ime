@@ -47,9 +47,9 @@ self.textInjector = injector
 
 | Setting | UserDefaults Key | Default | Type |
 |---------|-----------------|---------|------|
-| Fix browser autocomplete | `VnImeFixBrowserAutocomplete` | `true` | Bool |
-| Fix Chromium browsers | `VnImeFixChromiumBrowser` | `true` | Bool |
-| Send keys one by one | `VnImeSendKeyStepByStep` | `false` | Bool |
+| Fix browser autocomplete | `LotusKeyFixBrowserAutocomplete` | `true` | Bool |
+| Fix Chromium browsers | `LotusKeyFixChromiumBrowser` | `true` | Bool |
+| Send keys one by one | `LotusKeySendKeyStepByStep` | `false` | Bool |
 
 ### UI Layout
 

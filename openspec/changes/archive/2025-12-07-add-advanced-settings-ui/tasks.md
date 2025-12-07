@@ -8,29 +8,29 @@ Add UI controls for existing TextInjector configuration options.
 ### Phase 1: Storage Layer
 - [x] **T1: Add settings keys to SettingsKey enum**
   - Add `fixBrowserAutocomplete`, `fixChromiumBrowser`, `sendKeyStepByStep`
-  - File: `Sources/VnIme/Storage/SettingsStore.swift`
+  - File: `Sources/LotusKey/Storage/SettingsStore.swift`
   - Verification: Build passes
 
 - [x] **T2: Add properties to SettingsStoring protocol**
   - Add three new `Bool` properties with getters/setters
-  - File: `Sources/VnIme/Storage/SettingsStore.swift`
+  - File: `Sources/LotusKey/Storage/SettingsStore.swift`
   - Verification: Build passes
 
 - [x] **T3: Implement properties in SettingsStore**
   - Follow existing pattern (lock, defaults, subject.send)
   - Register defaults: `fixBrowserAutocomplete=true`, `fixChromiumBrowser=true`, `sendKeyStepByStep=false`
-  - File: `Sources/VnIme/Storage/SettingsStore.swift`
+  - File: `Sources/LotusKey/Storage/SettingsStore.swift`
   - Verification: Build passes
 
 - [x] **T4: Add keys to resetToDefaults()**
   - Include new keys in reset array
-  - File: `Sources/VnIme/Storage/SettingsStore.swift`
+  - File: `Sources/LotusKey/Storage/SettingsStore.swift`
   - Verification: Build passes
 
 ### Phase 2: UI Layer
 - [x] **T5: Add @AppStorage bindings in SettingsView**
   - Add three `@AppStorage` properties in `GeneralSettingsView`
-  - File: `Sources/VnIme/UI/SettingsView.swift`
+  - File: `Sources/LotusKey/UI/SettingsView.swift`
   - Verification: Build passes
 
 - [x] **T6: Add "Advanced" GroupBox with toggles**
@@ -40,7 +40,7 @@ Add UI controls for existing TextInjector configuration options.
     - "Fix Chromium browsers" (default: ON)
     - "Send keys one by one" (default: OFF)
   - Add help text explaining each option
-  - File: `Sources/VnIme/UI/SettingsView.swift`
+  - File: `Sources/LotusKey/UI/SettingsView.swift`
   - Verification: UI preview shows new section
 
 ### Phase 3: Wiring
@@ -52,7 +52,7 @@ Add UI controls for existing TextInjector configuration options.
     injector.sendKeyStepByStep = settings.sendKeyStepByStep
     ```
   - Note: `AppDelegate` holds direct reference to `textInjector` (line 18, 171)
-  - File: `Sources/VnIme/App/AppDelegate.swift`
+  - File: `Sources/LotusKey/App/AppDelegate.swift`
   - Verification: Build passes
 
 - [x] **T8: Subscribe to settings changes for TextInjector**
@@ -65,7 +65,7 @@ Add UI controls for existing TextInjector configuration options.
     case .sendKeyStepByStep:
         textInjector?.sendKeyStepByStep = settings.sendKeyStepByStep
     ```
-  - File: `Sources/VnIme/App/AppDelegate.swift`
+  - File: `Sources/LotusKey/App/AppDelegate.swift`
   - Verification: Build passes, settings changes take effect immediately
 
 ### Phase 4: Testing
@@ -75,7 +75,7 @@ Add UI controls for existing TextInjector configuration options.
   - Test persistence (set value, read back)
   - Test settingsChanged publisher fires for each key
   - Test resetToDefaults() resets new keys
-  - File: `Tests/VnImeTests/StorageTests.swift` (new file)
+  - File: `Tests/LotusKeyTests/StorageTests.swift` (new file)
   - Verification: `swift test` passes
 
 ### Phase 5: Validation

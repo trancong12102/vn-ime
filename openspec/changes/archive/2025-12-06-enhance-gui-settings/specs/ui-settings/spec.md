@@ -52,7 +52,7 @@ The system SHALL persist all user settings.
 #### Scenario: Settings key consistency
 - **WHEN** settings are read or written
 - **THEN** both SwiftUI `@AppStorage` and `SettingsStore` use the same UserDefaults keys
-- **AND** keys follow the pattern `VnIme{SettingName}` (e.g., `VnImeSpellCheckEnabled`)
+- **AND** keys follow the pattern `LotusKey{SettingName}` (e.g., `LotusKeySpellCheckEnabled`)
 
 #### Scenario: Settings saved automatically
 - **WHEN** user changes any setting
@@ -80,7 +80,7 @@ The system SHALL provide a setting to control restore-on-invalid behavior.
 
 #### Scenario: Setting persistence
 - **WHEN** user changes "Restore keys if invalid word" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeRestoreIfWrongSpelling`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyRestoreIfWrongSpelling`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Default value

@@ -2,12 +2,12 @@
 
 ## Why
 
-VnIme đã implement nhiều tính năng trong engine nhưng chưa expose hết trong GUI Settings. User cần có thể cấu hình các tính năng đã có, đặc biệt là "Restore if wrong spelling" - một tính năng hữu ích khi gõ sai từ.
+LotusKey đã implement nhiều tính năng trong engine nhưng chưa expose hết trong GUI Settings. User cần có thể cấu hình các tính năng đã có, đặc biệt là "Restore if wrong spelling" - một tính năng hữu ích khi gõ sai từ.
 
 ## What Changes
 
 ### 1. **BUG FIX** - Sửa @AppStorage keys không khớp với SettingsKey
-- **FIXED** `SettingsView.swift` sử dụng keys ngắn (`"launchAtLogin"`) trong khi `SettingsStore` sử dụng keys với prefix (`"VnImeLaunchAtLogin"`)
+- **FIXED** `SettingsView.swift` sử dụng keys ngắn (`"launchAtLogin"`) trong khi `SettingsStore` sử dụng keys với prefix (`"LotusKeyLaunchAtLogin"`)
 - Điều này khiến UI và engine sử dụng **2 UserDefaults keys khác nhau**
 - Cần thống nhất tất cả về sử dụng `SettingsKey.rawValue`
 
@@ -27,9 +27,9 @@ VnIme đã implement nhiều tính năng trong engine nhưng chưa expose hết 
 
 - **Affected specs**: `ui-settings`
 - **Affected code**:
-  - `Sources/VnIme/Storage/SettingsStore.swift` - Thêm 1 settings key mới
-  - `Sources/VnIme/UI/SettingsView.swift` - **Fix @AppStorage keys**, thêm toggle và cải thiện layout
-  - `Sources/VnIme/App/AppDelegate.swift` - Wire setting mới vào engine
+  - `Sources/LotusKey/Storage/SettingsStore.swift` - Thêm 1 settings key mới
+  - `Sources/LotusKey/UI/SettingsView.swift` - **Fix @AppStorage keys**, thêm toggle và cải thiện layout
+  - `Sources/LotusKey/App/AppDelegate.swift` - Wire setting mới vào engine
 
 ## Out of Scope
 

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Script tạo VnIme.app bundle từ SPM build
+# Script tạo LotusKey.app bundle từ SPM build
 
 set -e
 
-APP_NAME="VnIme"
+APP_NAME="LotusKey"
 BUILD_DIR=".build/debug"
 APP_BUNDLE="${APP_NAME}.app"
 CONTENTS_DIR="${APP_BUNDLE}/Contents"
@@ -31,7 +31,7 @@ cat > "${CONTENTS_DIR}/Info.plist" << PLIST
     <key>CFBundleExecutable</key>
     <string>${APP_NAME}</string>
     <key>CFBundleIdentifier</key>
-    <string>com.example.vnime</string>
+    <string>com.lotuskey.app</string>
     <key>CFBundleName</key>
     <string>${APP_NAME}</string>
     <key>CFBundlePackageType</key>

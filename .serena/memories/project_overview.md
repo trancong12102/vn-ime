@@ -1,7 +1,7 @@
-# VnIme Project Overview
+# LotusKey Project Overview
 
 ## Purpose
-VnIme is a Vietnamese input method for macOS, rewritten in Swift from [OpenKey](https://github.com/tuyenvm/OpenKey). It uses an advanced backspace technique to provide seamless Vietnamese text input, avoiding underlining issues present in default system input methods.
+LotusKey is a Vietnamese input method for macOS, rewritten in Swift from [OpenKey](https://github.com/tuyenvm/OpenKey). It uses an advanced backspace technique to provide seamless Vietnamese text input, avoiding underlining issues present in default system input methods.
 
 ## Key Features
 - **Input Methods**: Telex, Simple Telex

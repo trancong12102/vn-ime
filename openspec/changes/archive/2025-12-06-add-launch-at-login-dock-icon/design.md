@@ -2,7 +2,7 @@
 
 ## Context
 
-VnIme is a Vietnamese input method editor that runs as a menu bar application. Two features have placeholder implementations:
+LotusKey is a Vietnamese input method editor that runs as a menu bar application. Two features have placeholder implementations:
 1. Launch at Login - currently saves preference but doesn't register with system
 2. Dock Icon Toggle - currently saves preference but doesn't change app behavior
 

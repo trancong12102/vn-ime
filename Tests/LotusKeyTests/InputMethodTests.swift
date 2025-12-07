@@ -1,5 +1,5 @@
 import XCTest
-@testable import VnIme
+@testable import LotusKey
 
 final class InputMethodTests: XCTestCase {
     // MARK: - Telex Tests

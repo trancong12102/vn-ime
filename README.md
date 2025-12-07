@@ -1,6 +1,6 @@
-# VnIme
+# LotusKey
 
-Bộ gõ tiếng Việt cho macOS, được viết lại hoàn toàn bằng Swift từ [OpenKey](https://github.com/tuyenvm/OpenKey).
+Bộ gõ tiếng Việt cho macOS, được viết hoàn toàn bằng Swift. Lấy cảm hứng từ [OpenKey](https://github.com/tuyenvm/OpenKey).
 
 ## Tính năng
 
@@ -17,16 +17,16 @@ Bộ gõ tiếng Việt cho macOS, được viết lại hoàn toàn bằng Swif
 
 ## Thiết lập quyền Accessibility
 
-VnIme cần quyền Accessibility để hoạt động. Khi chạy lần đầu:
+LotusKey cần quyền Accessibility để hoạt động. Khi chạy lần đầu:
 
-1. VnIme sẽ hiển thị dialog yêu cầu quyền
+1. LotusKey sẽ hiển thị dialog yêu cầu quyền
 2. Click **"Open System Settings"**
 3. Trong System Settings → Privacy & Security → Accessibility:
-   - Tìm VnIme trong danh sách
+   - Tìm LotusKey trong danh sách
    - Bật toggle để cấp quyền
-4. Quay lại VnIme, click **"Check Permission Status"** hoặc **"Continue"**
+4. Quay lại LotusKey, click **"Check Permission Status"** hoặc **"Continue"**
 
-> **Lưu ý**: Nếu VnIme không xuất hiện trong danh sách, hãy thử kéo ứng dụng VnIme vào list hoặc restart ứng dụng.
+> **Lưu ý**: Nếu LotusKey không xuất hiện trong danh sách, hãy thử kéo ứng dụng LotusKey vào list hoặc restart ứng dụng.
 
 ## Cài đặt
 
@@ -34,25 +34,25 @@ VnIme cần quyền Accessibility để hoạt động. Khi chạy lần đầu:
 
 ```bash
 # Clone repository
-git clone https://github.com/trancong12102/vn-ime.git
-cd vn-ime
+git clone https://github.com/lotus-key/lotus-key.git
+cd lotus-key
 
 # Build
 swift build -c release
 
 # Chạy ứng dụng
-.build/release/VnIme
+.build/release/LotusKey
 ```
 
 ### Từ Release
 
-Tải xuống file `.dmg` từ [Releases](https://github.com/trancong12102/vn-ime/releases) và kéo VnIme vào thư mục Applications.
+Tải xuống file `.dmg` từ [Releases](https://github.com/lotus-key/lotus-key/releases) và kéo LotusKey vào thư mục Applications.
 
 ## Sử dụng
 
-1. Khởi động VnIme
+1. Khởi động LotusKey
 2. Cấp quyền Accessibility khi được yêu cầu
-3. Icon VnIme sẽ xuất hiện trên menu bar
+3. Icon LotusKey sẽ xuất hiện trên menu bar
 4. Click vào icon để chuyển đổi giữa tiếng Việt và tiếng Anh
 
 ### Phím tắt
@@ -63,11 +63,11 @@ Tải xuống file `.dmg` từ [Releases](https://github.com/trancong12102/vn-im
 | `Command` (giữ) | Tạm tắt bộ gõ (dùng cho shortcuts) |
 | `Control` (giữ) | Tạm tắt kiểm tra chính tả |
 
-> **Mẹo**: Giữ Command khi gõ shortcuts (Cmd+C, Cmd+V) để tránh VnIme xử lý sai.
+> **Mẹo**: Giữ Command khi gõ shortcuts (Cmd+C, Cmd+V) để tránh LotusKey xử lý sai.
 
 ### Ứng dụng được hỗ trợ
 
-VnIme hoạt động với hầu hết các ứng dụng macOS. Một số ứng dụng có workaround đặc biệt:
+LotusKey hoạt động với hầu hết các ứng dụng macOS. Một số ứng dụng có workaround đặc biệt:
 
 | Ứng dụng | Ghi chú |
 |----------|---------|
@@ -79,11 +79,11 @@ VnIme hoạt động với hầu hết các ứng dụng macOS. Một số ứng
 
 ### Tương thích bàn phím
 
-VnIme hỗ trợ các layout bàn phím không phải QWERTY (Dvorak, Colemak, v.v.) thông qua tùy chọn **Layout Compatibility** trong Settings.
+LotusKey hỗ trợ các layout bàn phím không phải QWERTY (Dvorak, Colemak, v.v.) thông qua tùy chọn **Layout Compatibility** trong Settings.
 
 ### Tương thích với IME khác
 
-VnIme tự động bypass khi phát hiện IME tiếng Nhật, Trung, Hàn đang hoạt động để tránh xung đột.
+LotusKey tự động bypass khi phát hiện IME tiếng Nhật, Trung, Hàn đang hoạt động để tránh xung đột.
 
 ### Kiểu gõ Telex
 
@@ -126,7 +126,7 @@ swift test
 ### Cấu trúc dự án
 
 ```text
-Sources/VnIme/
+Sources/LotusKey/
 ├── App/                    # Entry point, AppDelegate
 ├── Core/                   # Vietnamese input engine
 │   ├── Engine/             # Main processing logic
@@ -156,5 +156,5 @@ Dự án này được phân phối theo giấy phép [GNU General Public Licens
 
 ## Lời cảm ơn
 
-- [OpenKey](https://github.com/tuyenvm/OpenKey) - Dự án gốc
-- Cộng đồng người dùng tiếng Việt trên macOS
+- [OpenKey](https://github.com/tuyenvm/OpenKey) - Nguồn cảm hứng cho ý tưởng xử lý tiếng Việt trên macOS
+- [ibus-bamboo](https://github.com/BambooEngine/ibus-bamboo) - Tham khảo thuật toán spell checking và tone repositioning

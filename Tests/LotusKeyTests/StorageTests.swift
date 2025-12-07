@@ -1,6 +1,6 @@
 import Combine
 import XCTest
-@testable import VnIme
+@testable import LotusKey
 
 @MainActor
 final class StorageTests: XCTestCase {
@@ -12,7 +12,7 @@ final class StorageTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // Create isolated UserDefaults for testing
-        testSuiteName = "com.vn-ime.tests.\(UUID().uuidString)"
+        testSuiteName = "com.lotuskey.tests.\(UUID().uuidString)"
         testDefaults = UserDefaults(suiteName: testSuiteName)!
         settings = SettingsStore(defaults: testDefaults)
         cancellables = []
@@ -172,8 +172,8 @@ final class StorageTests: XCTestCase {
     // MARK: - Settings Keys
 
     func testAdvancedSettingsKeyRawValues() {
-        XCTAssertEqual(SettingsKey.fixBrowserAutocomplete.rawValue, "VnImeFixBrowserAutocomplete")
-        XCTAssertEqual(SettingsKey.fixChromiumBrowser.rawValue, "VnImeFixChromiumBrowser")
-        XCTAssertEqual(SettingsKey.sendKeyStepByStep.rawValue, "VnImeSendKeyStepByStep")
+        XCTAssertEqual(SettingsKey.fixBrowserAutocomplete.rawValue, "LotusKeyFixBrowserAutocomplete")
+        XCTAssertEqual(SettingsKey.fixChromiumBrowser.rawValue, "LotusKeyFixChromiumBrowser")
+        XCTAssertEqual(SettingsKey.sendKeyStepByStep.rawValue, "LotusKeySendKeyStepByStep")
     }
 }

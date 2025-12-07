@@ -21,9 +21,9 @@ These are essential features for a production-ready macOS input method applicati
 
 - **Affected specs**: `ui-settings`
 - **Affected code**:
-  - `Sources/VnIme/Storage/SettingsStore.swift` - Remove TODOs, add lifecycle manager calls
-  - `Sources/VnIme/App/AppDelegate.swift` - Initialize lifecycle manager, apply settings on launch
-  - New file: `Sources/VnIme/App/AppLifecycleManager.swift`
+  - `Sources/LotusKey/Storage/SettingsStore.swift` - Remove TODOs, add lifecycle manager calls
+  - `Sources/LotusKey/App/AppDelegate.swift` - Initialize lifecycle manager, apply settings on launch
+  - New file: `Sources/LotusKey/App/AppLifecycleManager.swift`
   - `Package.swift` - No changes needed (ServiceManagement is system framework)
 - **Breaking changes**: None
 - **User-facing changes**: Features now work as expected from UI toggles

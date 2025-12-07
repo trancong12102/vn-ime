@@ -22,7 +22,7 @@ struct AccessibilityPermissionView: View {
 
             // Description
             VStack(alignment: .leading, spacing: 12) {
-                Text("VnIme needs accessibility permissions to:")
+                Text("LotusKey needs accessibility permissions to:")
                     .font(.headline)
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -80,7 +80,7 @@ struct AccessibilityPermissionView: View {
             }
 
             // Help text
-            Text("Go to System Settings → Privacy & Security → Accessibility,\nthen enable VnIme in the list.")
+            Text("Go to System Settings → Privacy & Security → Accessibility,\nthen enable LotusKey in the list.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -208,7 +208,7 @@ final class AccessibilityPermissionWindowController {
             defer: false
         )
         window.contentView = hostingView
-        window.title = "VnIme - Permission Required"
+        window.title = "LotusKey - Permission Required"
         window.level = .floating
         window.center()
 

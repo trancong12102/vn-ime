@@ -2,7 +2,7 @@
 
 ## Context
 
-VnIme engine đã implement tính năng `restoreIfWrongSpelling` nhưng chưa expose trong UI. Change này đơn giản là thêm UI toggle và wire vào engine.
+LotusKey engine đã implement tính năng `restoreIfWrongSpelling` nhưng chưa expose trong UI. Change này đơn giản là thêm UI toggle và wire vào engine.
 
 ## Goals / Non-Goals
 
@@ -22,7 +22,7 @@ VnIme engine đã implement tính năng `restoreIfWrongSpelling` nhưng chưa ex
 ```swift
 public enum SettingsKey: String {
     // ... existing keys ...
-    case restoreIfWrongSpelling = "VnImeRestoreIfWrongSpelling"
+    case restoreIfWrongSpelling = "LotusKeyRestoreIfWrongSpelling"
 }
 ```
 

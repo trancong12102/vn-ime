@@ -14,7 +14,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Fix browser autocomplete persistence
 - **WHEN** user changes "Fix browser autocomplete" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeFixBrowserAutocomplete`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyFixBrowserAutocomplete`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Fix browser autocomplete effect
@@ -30,7 +30,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Fix Chromium browser persistence
 - **WHEN** user changes "Fix Chromium browsers" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeFixChromiumBrowser`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyFixChromiumBrowser`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Fix Chromium browser effect
@@ -51,7 +51,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Send key step-by-step persistence
 - **WHEN** user changes "Send keys one by one" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeSendKeyStepByStep`
+- **THEN** setting is saved to UserDefaults with key `LotusKeySendKeyStepByStep`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Send key step-by-step effect

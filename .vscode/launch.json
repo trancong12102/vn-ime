@@ -4,21 +4,21 @@
       "type": "swift",
       "request": "launch",
       "args": [],
-      "cwd": "${workspaceFolder:vn-ime}",
-      "name": "Debug VnIme",
-      "target": "VnIme",
+      "cwd": "${workspaceFolder:lotus-key}",
+      "name": "Debug LotusKey",
+      "target": "LotusKey",
       "configuration": "debug",
-      "preLaunchTask": "swift: Build Debug VnIme"
+      "preLaunchTask": "swift: Build Debug LotusKey"
     },
     {
       "type": "swift",
       "request": "launch",
       "args": [],
-      "cwd": "${workspaceFolder:vn-ime}",
-      "name": "Release VnIme",
-      "target": "VnIme",
+      "cwd": "${workspaceFolder:lotus-key}",
+      "name": "Release LotusKey",
+      "target": "LotusKey",
       "configuration": "release",
-      "preLaunchTask": "swift: Build Release VnIme"
+      "preLaunchTask": "swift: Build Release LotusKey"
     }
   ]
 }

@@ -87,7 +87,7 @@ The system SHALL persist all user settings.
 #### Scenario: Settings key consistency
 - **WHEN** settings are read or written
 - **THEN** both SwiftUI `@AppStorage` and `SettingsStore` use the same UserDefaults keys
-- **AND** keys follow the pattern `VnIme{SettingName}` (e.g., `VnImeSpellCheckEnabled`)
+- **AND** keys follow the pattern `LotusKey{SettingName}` (e.g., `LotusKeySpellCheckEnabled`)
 
 #### Scenario: Settings saved automatically
 - **WHEN** user changes any setting
@@ -199,7 +199,7 @@ The system SHALL provide a setting to control restore-on-invalid behavior.
 
 #### Scenario: Setting persistence
 - **WHEN** user changes "Restore keys if invalid word" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeRestoreIfWrongSpelling`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyRestoreIfWrongSpelling`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Default value
@@ -227,7 +227,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Fix browser autocomplete persistence
 - **WHEN** user changes "Fix browser autocomplete" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeFixBrowserAutocomplete`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyFixBrowserAutocomplete`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Fix browser autocomplete effect
@@ -243,7 +243,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Fix Chromium browser persistence
 - **WHEN** user changes "Fix Chromium browsers" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeFixChromiumBrowser`
+- **THEN** setting is saved to UserDefaults with key `LotusKeyFixChromiumBrowser`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Fix Chromium browser effect
@@ -264,7 +264,7 @@ The system SHALL provide settings to control text injection behavior for compati
 
 #### Scenario: Send key step-by-step persistence
 - **WHEN** user changes "Send keys one by one" setting
-- **THEN** setting is saved to UserDefaults with key `VnImeSendKeyStepByStep`
+- **THEN** setting is saved to UserDefaults with key `LotusKeySendKeyStepByStep`
 - **AND** setting is restored on next app launch
 
 #### Scenario: Send key step-by-step effect

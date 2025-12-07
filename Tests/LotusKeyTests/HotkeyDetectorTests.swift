@@ -1,5 +1,5 @@
 import XCTest
-@testable import VnIme
+@testable import LotusKey
 
 final class HotkeyDetectorTests: XCTestCase {
     // MARK: - CGEventFlags Extension Tests

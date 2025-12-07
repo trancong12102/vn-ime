@@ -110,7 +110,7 @@ public extension UserDefaults {
 // MARK: - Notification Names
 
 public extension Notification.Name {
-    static let vnImeLanguageChanged = Notification.Name("VnImeLanguageChanged")
-    static let vnImeSettingsChanged = Notification.Name("VnImeSettingsChanged")
-    static let vnImeEngineReset = Notification.Name("VnImeEngineReset")
+    static let lotusKeyLanguageChanged = Notification.Name("LotusKeyLanguageChanged")
+    static let lotusKeySettingsChanged = Notification.Name("LotusKeySettingsChanged")
+    static let lotusKeyEngineReset = Notification.Name("LotusKeyEngineReset")
 }

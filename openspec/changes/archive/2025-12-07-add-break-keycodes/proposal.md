@@ -4,7 +4,7 @@
 
 ESC key và các navigation keys (arrows, Tab, Enter) hiện không được xử lý đúng cách. Khi user gõ "ho" rồi bấm ESC, engine không reset session mà thêm ESC character (`\u{1B}`) vào buffer, gây ra ký tự lạ khi gõ tiếp.
 
-**Root cause:** VnIme kiểm tra word break bằng character (`isWordBreak(char)`), trong khi OpenKey kiểm tra bằng keycode (`isWordBreak(keycode)`). ESC character (`\u{1B}`) không có trong `wordBreakChars` set.
+**Root cause:** LotusKey kiểm tra word break bằng character (`isWordBreak(char)`), trong khi OpenKey kiểm tra bằng keycode (`isWordBreak(keycode)`). ESC character (`\u{1B}`) không có trong `wordBreakChars` set.
 
 ## What Changes
 
@@ -30,9 +30,9 @@ ESC key và các navigation keys (arrows, Tab, Enter) hiện không được x�
   - `specs/core-engine/spec.md` - word break detection
 
 - **Affected code**:
-  - `Sources/VnIme/Core/Engine/VietnameseEngine.swift` - processKey logic
-  - `Sources/VnIme/Core/Engine/TypedCharacter.swift` - keycode constants
-  - `Sources/VnIme/Utilities/Extensions.swift` - NSEvent.KeyCode enum
+  - `Sources/LotusKey/Core/Engine/VietnameseEngine.swift` - processKey logic
+  - `Sources/LotusKey/Core/Engine/TypedCharacter.swift` - keycode constants
+  - `Sources/LotusKey/Utilities/Extensions.swift` - NSEvent.KeyCode enum
 
 ## Reference
 

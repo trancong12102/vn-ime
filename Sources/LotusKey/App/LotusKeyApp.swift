@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct VnImeApp: App {
+struct LotusKeyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Window("VnIme", id: "settings") {
+        Window("LotusKey", id: "settings") {
             SettingsView()
         }
         .windowResizability(.contentSize)

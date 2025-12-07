@@ -3,14 +3,14 @@
 ## 0. Bug Fix - @AppStorage Keys Mismatch (CRITICAL)
 
 - [x] 0.1 Fix `GeneralSettingsView` @AppStorage keys để sử dụng `SettingsKey.rawValue`:
-  - `"launchAtLogin"` → `"VnImeLaunchAtLogin"`
-  - `"showDockIcon"` → `"VnImeShowDockIcon"`
-  - `"spellCheckEnabled"` → `"VnImeSpellCheckEnabled"`
-  - `"smartSwitchEnabled"` → `"VnImeSmartSwitchEnabled"`
+  - `"launchAtLogin"` → `"LotusKeyLaunchAtLogin"`
+  - `"showDockIcon"` → `"LotusKeyShowDockIcon"`
+  - `"spellCheckEnabled"` → `"LotusKeySpellCheckEnabled"`
+  - `"smartSwitchEnabled"` → `"LotusKeySmartSwitchEnabled"`
 - [x] 0.2 Fix `InputMethodSettingsView` @AppStorage keys:
-  - `"inputMethod"` → `"VnImeInputMethod"`
-  - `"quickTelexEnabled"` → `"VnImeQuickTelexEnabled"`
-  - `"autoCapitalize"` → `"VnImeAutoCapitalize"`
+  - `"inputMethod"` → `"LotusKeyInputMethod"`
+  - `"quickTelexEnabled"` → `"LotusKeyQuickTelexEnabled"`
+  - `"autoCapitalize"` → `"LotusKeyAutoCapitalize"`
 - [x] 0.3 Test: Verify settings sync giữa UI và engine sau khi fix
 
 ## 1. Settings Infrastructure
@@ -26,7 +26,7 @@
 - [x] 2.1 Refactor `GeneralSettingsView` - tách Spelling ra khỏi Features GroupBox
 - [x] 2.2 Add "Restore keys if invalid word" toggle as sub-option của spell checking
 - [x] 2.3 Add help text "(Hold Ctrl to temporarily disable)"
-- [x] 2.4 Wire up `@AppStorage` binding cho setting mới (dùng đúng key `"VnImeRestoreIfWrongSpelling"`)
+- [x] 2.4 Wire up `@AppStorage` binding cho setting mới (dùng đúng key `"LotusKeyRestoreIfWrongSpelling"`)
 - [x] 2.5 Disable sub-options when spell check master toggle is off
 
 ## 3. Engine Wiring

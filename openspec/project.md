@@ -32,7 +32,7 @@ OpenKey Swift is a port of OpenKey to Swift - an open-source Vietnamese input me
 ### Architecture Patterns
 ```
 Sources/
-├── VnIme/
+├── LotusKey/
 │   ├── App/                    # Entry point, AppDelegate
 │   ├── Core/                   # Vietnamese input engine
 │   │   ├── Engine/             # Main processing logic
@@ -44,8 +44,8 @@ Sources/
 │   ├── UI/                     # SwiftUI views, Menu bar
 │   ├── Storage/                # UserDefaults, settings
 │   └── Utilities/              # Extensions, helpers
-├── VnImeTests/                 # Unit tests
-└── VnImeUITests/               # UI tests
+├── LotusKeyTests/                 # Unit tests
+└── LotusKeyUITests/               # UI tests
 ```
 
 **Design Patterns**:

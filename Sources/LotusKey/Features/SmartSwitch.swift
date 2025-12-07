@@ -27,7 +27,7 @@ public protocol SmartSwitching: Sendable {
 /// Default smart switch implementation
 public final class SmartSwitch: SmartSwitching, @unchecked Sendable {
     private var preferences: [String: Bool] = [:]
-    private let storageKey = "VnImeSmartSwitch"
+    private let storageKey = "LotusKeySmartSwitch"
     private var observer: NSObjectProtocol?
     private let lock = NSLock()
 

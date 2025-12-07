@@ -4,12 +4,12 @@
 
 OpenKey implements `checkGrammar()` (Engine.cpp:290-347) that automatically adjusts vowel modifiers when syllable structure changes. This handles edge cases where users type horn modifiers in non-standard order.
 
-**Important clarification:** VnIme already handles the common case correctly:
+**Important clarification:** LotusKey already handles the common case correctly:
 - `thuowng` → "thương" ✅ (applyModifier(.horn) detects "uo" pattern at line 451-456)
 
 **The gap is for non-standard typing orders:**
-- `thuwong` → VnIme: "thưong" ❌, OpenKey: "thương" ✅
-- `nưoc` → VnIme: "nưoc" ❌, OpenKey: "nước" ✅
+- `thuwong` → LotusKey: "thưong" ❌, OpenKey: "thương" ✅
+- `nưoc` → LotusKey: "nưoc" ❌, OpenKey: "nước" ✅
 
 **OpenKey's XOR logic (Engine.cpp:308):**
 ```cpp
@@ -33,7 +33,7 @@ if ((TypingWord[i-1] & TONEW_MASK) ^ (TypingWord[i-2] & TONEW_MASK)) {
 **Non-Goals:**
 - Changing standard typing flow (already works)
 - Dictionary-based spell checking (future feature)
-- Old orthography support (VnIme only supports modern)
+- Old orthography support (LotusKey only supports modern)
 
 ## Decisions
 

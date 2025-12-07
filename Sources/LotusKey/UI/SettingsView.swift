@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Modern Settings view for VnIme - macOS 2025 design patterns
+/// Modern Settings view for LotusKey - macOS 2025 design patterns
 /// Two tabs: General (all settings) and About (app info)
 struct SettingsView: View {
     // Input method settings
@@ -134,7 +134,7 @@ struct SettingsView: View {
                     .resizable()
                     .frame(width: 80, height: 80)
 
-                Text("VnIme")
+                Text("LotusKey")
                     .font(.title.bold())
 
                 Text("Version \(appVersion)")
@@ -151,7 +151,7 @@ struct SettingsView: View {
 
             // Links
             HStack(spacing: 16) {
-                if let url = URL(string: "https://github.com/trancong12102/vn-ime") {
+                if let url = URL(string: "https://github.com/lotus-key/lotus-key") {
                     Link(destination: url) {
                         Label("GitHub", systemImage: "link")
                     }

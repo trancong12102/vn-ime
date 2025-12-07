@@ -4,14 +4,14 @@
 
 OpenKey has a `checkGrammar()` function (Engine.cpp:290-347) that automatically adjusts vowel modifiers when syllable structure changes during typing. This handles edge cases where horn modifiers are applied in non-standard order.
 
-**Current VnIme behavior:**
+**Current LotusKey behavior:**
 - `thuowng` → "thương" ✅ (w after "o" triggers "uo" pattern detection)
 - `thuwong` → "thưong" ❌ (w after "u" only applies horn to u, not auto-fixed later)
 
 **OpenKey behavior:**
 - Both inputs produce "thương" because `checkGrammar()` auto-fixes when ending consonant is typed
 
-**Gap:** VnIme doesn't auto-adjust modifiers after the initial W key press. If user types horn on "u" first, then "o", the XOR pattern (one has horn, other doesn't) is not corrected when ending consonant is added.
+**Gap:** LotusKey doesn't auto-adjust modifiers after the initial W key press. If user types horn on "u" first, then "o", the XOR pattern (one has horn, other doesn't) is not corrected when ending consonant is added.
 
 ## What Changes
 

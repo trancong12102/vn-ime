@@ -10,7 +10,7 @@ swift build
 swift build -c release
 
 # Run the application (after building)
-.build/release/VnIme
+.build/release/LotusKey
 ```
 
 ## Testing Commands
@@ -20,7 +20,7 @@ swift build -c release
 swift test
 
 # Run specific test target
-swift test --filter VnImeTests
+swift test --filter LotusKeyTests
 
 # Run specific test class
 swift test --filter EngineTests
