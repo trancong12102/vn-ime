@@ -29,6 +29,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Keyboard layout converter for non-QWERTY layouts
     private var layoutConverter: KeyboardLayoutConverter?
 
+    /// Smart switch for per-application language memory
+    private var smartSwitch: SmartSwitch?
+
+    /// Track previous app for smart switch save on app change
+    private var previousAppBundleId: String?
+
     /// Settings store
     private let settings = SettingsStore()
 
@@ -386,11 +392,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Start monitoring applications
         appDetector.startMonitoring()
 
-        // Subscribe to application changes to update quirks
+        // Initialize SmartSwitch
+        let smartSwitch = SmartSwitch()
+        self.smartSwitch = smartSwitch
+
+        // Capture initial app for smart switch (so first app switch saves correctly)
+        previousAppBundleId = appDetector.currentBundleIdentifier
+
+        // Subscribe to application changes for quirks and smart switch
         appDetector.applicationChanged
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.updateAppQuirks()
+            .sink { [weak self] bundleId in
+                self?.handleAppChange(newBundleId: bundleId)
+            }
+            .store(in: &cancellables)
+
+        // Subscribe to language mode changes from keyboard handler (hotkey toggles)
+        handler.languageModeChanged
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isVietnamese in
+                self?.handleLanguageModeChange(isVietnamese)
             }
             .store(in: &cancellables)
 
@@ -429,6 +450,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             textInjector?.fixChromiumBrowser = settings.fixChromiumBrowser
         case .sendKeyStepByStep:
             textInjector?.sendKeyStepByStep = settings.sendKeyStepByStep
+        case .smartSwitchEnabled:
+            // When enabled, save current mode for current app
+            if settings.smartSwitchEnabled,
+               let handler = eventHandler,
+               let smartSwitch = smartSwitch,
+               let bundleId = applicationDetector?.currentBundleIdentifier {
+                smartSwitch.setVietnameseEnabled(handler.isVietnameseMode, for: bundleId)
+            }
         default:
             break
         }
@@ -439,12 +468,62 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         injector.setAppQuirk(appDetector.currentAppQuirk)
     }
 
+    // MARK: - Smart Switch
+
+    private func handleAppChange(newBundleId: String?) {
+        // Always update app quirks
+        updateAppQuirks()
+
+        guard settings.smartSwitchEnabled,
+              let handler = eventHandler,
+              let smartSwitch = smartSwitch,
+              let newBundleId = newBundleId else {
+            previousAppBundleId = newBundleId
+            return
+        }
+
+        // Save current language mode for previous app (if exists)
+        if let prevId = previousAppBundleId {
+            smartSwitch.setVietnameseEnabled(handler.isVietnameseMode, for: prevId)
+        }
+
+        // Restore or save for new app
+        if smartSwitch.hasPreference(for: newBundleId) {
+            // Restore saved preference (direct set, no publish)
+            let savedMode = smartSwitch.shouldEnableVietnamese(for: newBundleId)
+            if handler.isVietnameseMode != savedMode {
+                handler.isVietnameseMode = savedMode
+                engine?.reset()  // Reset engine when mode changes
+            }
+            updateLanguageModeMenuItem(isVietnameseMode: savedMode)
+        } else {
+            // First time seeing this app - save current mode
+            smartSwitch.setVietnameseEnabled(handler.isVietnameseMode, for: newBundleId)
+        }
+
+        previousAppBundleId = newBundleId
+    }
+
+    private func handleLanguageModeChange(_ isVietnamese: Bool) {
+        // Update menu bar
+        updateLanguageModeMenuItem(isVietnameseMode: isVietnamese)
+
+        // Save preference for current app if smart switch is enabled
+        guard settings.smartSwitchEnabled,
+              let smartSwitch = smartSwitch,
+              let currentBundleId = applicationDetector?.currentBundleIdentifier else {
+            return
+        }
+
+        smartSwitch.setVietnameseEnabled(isVietnamese, for: currentBundleId)
+    }
+
     // MARK: - Actions
 
     @objc private func toggleLanguageMode() {
         guard let handler = eventHandler else { return }
-        handler.isVietnameseMode.toggle()
-        updateLanguageModeMenuItem(isVietnameseMode: handler.isVietnameseMode)
+        handler.toggleVietnameseMode()
+        // Menu update will be triggered via languageModeChanged subscription
     }
 
     @objc private func openSettings() {

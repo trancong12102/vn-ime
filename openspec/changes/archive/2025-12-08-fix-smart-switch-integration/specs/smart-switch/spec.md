@@ -1,8 +1,7 @@
-# smart-switch Specification
+# smart-switch Spec Delta
 
-## Purpose
-Defines the Smart Switch feature that remembers and automatically restores the user's language preference (Vietnamese/English) for each application.
-## Requirements
+## MODIFIED Requirements
+
 ### Requirement: Per-Application Language Memory
 
 The system SHALL remember language preference for each application when Smart Switch is enabled.
@@ -28,31 +27,3 @@ The system SHALL remember language preference for each application when Smart Sw
 - **WHEN** user manually toggles language mode (via hotkey or menu)
 - **AND** Smart Switch is enabled
 - **THEN** the new language preference is saved for the current application
-
-### Requirement: Application Detection
-
-The system SHALL detect the frontmost application for Smart Switch.
-
-#### Scenario: Application switch detection
-- **WHEN** user clicks on a different application window
-- **OR** uses Cmd+Tab to switch apps
-- **THEN** the system detects the new frontmost application
-
-#### Scenario: Application identification
-- **WHEN** frontmost application changes
-- **THEN** the application is identified by bundle identifier
-
----
-
-### Requirement: Smart Switch Storage
-
-The system SHALL persist Smart Switch data.
-
-#### Scenario: Persist app preferences
-- **WHEN** app preference is saved
-- **THEN** it survives application restart
-
-#### Scenario: Clear app preferences
-- **WHEN** user clears Smart Switch data
-- **THEN** all per-app preferences are removed
-

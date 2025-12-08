@@ -14,6 +14,11 @@ public protocol SmartSwitching: Sendable {
     ///   - bundleIdentifier: The application bundle identifier
     func setVietnameseEnabled(_ enabled: Bool, for bundleIdentifier: String)
 
+    /// Check if there is a saved preference for an application
+    /// - Parameter bundleIdentifier: The application bundle identifier
+    /// - Returns: True if a preference exists, false otherwise
+    func hasPreference(for bundleIdentifier: String) -> Bool
+
     /// Start monitoring for application changes
     func startMonitoring()
 
@@ -53,6 +58,12 @@ public final class SmartSwitch: SmartSwitching, @unchecked Sendable {
         preferences[bundleIdentifier] = enabled
         lock.unlock()
         savePreferences()
+    }
+
+    public func hasPreference(for bundleIdentifier: String) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return preferences[bundleIdentifier] != nil
     }
 
     public func startMonitoring() {

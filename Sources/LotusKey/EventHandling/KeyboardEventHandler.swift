@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import Combine
 import Foundation
 
 /// Protocol for keyboard event handling
@@ -66,6 +67,12 @@ public final class KeyboardEventHandler: KeyboardEventHandling, @unchecked Senda
 
     /// Whether Vietnamese mode is active
     public var isVietnameseMode: Bool = true
+
+    /// Publisher for language mode changes (fires only from toggleVietnameseMode)
+    private let languageModeChangedSubject = PassthroughSubject<Bool, Never>()
+    public var languageModeChanged: AnyPublisher<Bool, Never> {
+        languageModeChangedSubject.eraseToAnyPublisher()
+    }
 
     /// Temporary engine disable (toggled via Command key release)
     fileprivate var tempOffEngine: Bool = false
@@ -380,8 +387,11 @@ public final class KeyboardEventHandler: KeyboardEventHandling, @unchecked Senda
             || flags.contains(.maskHelp)
     }
 
-    private func toggleVietnameseMode() {
+    /// Toggle Vietnamese mode and publish the change
+    /// Note: Use this for user-initiated toggles. For restore operations, set isVietnameseMode directly.
+    public func toggleVietnameseMode() {
         isVietnameseMode.toggle()
+        languageModeChangedSubject.send(isVietnameseMode)
         if enableBeepOnSwitch {
             NSSound.beep()
         }
