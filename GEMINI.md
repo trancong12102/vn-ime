@@ -17,130 +17,40 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 <!-- OPENSPEC:END -->
 
-# Project Instructions
-
-<ask_user_questions>
-## User Questions
-
-Use the `AskUserQuestion` tool when asking questions to ensure a consistent, structured interaction experience.
-
-Guidelines:
-- Ask questions through the AskUserQuestion tool for clarifications, confirmations, and decisions
-- Split into multiple tool calls when you have many questions
-- This applies across all contexts
-
-Benefits:
-- Structured responses with consistent UI
-- Clear options users can see and select
-- Questions are highlighted and easy to identify in the conversation
-</ask_user_questions>
-
 ---
 
-<research_with_mcp_tools>
-## Technical Research
+# Mandatory Instructions
 
-Use MCP tools for technical research rather than relying on pretrained knowledge. Libraries evolve rapidly with breaking changes, APIs differ between versions, and security vulnerabilities emerge after training cutoffs.
+<context>
+The current date is **December 2025**. Use this as the reference point for determining what is "latest" or "current" when discussing technologies, versions, or best practices.
+</context>
 
-### When to Use MCP Tools
+<documentation_workflow>
+## Always Fetch Latest Documentation
 
-Use MCP tools when:
-- Brainstorming solutions or architecture
-- Implementing new features
-- Debugging issues
-- Comparing libraries or approaches
-- Writing code with external dependencies
-- Answering questions about any technology
+When working with any library, framework, technology, concept, or knowledge area that you are uncertain about or that may have changed since your training:
 
-### Tool Priority
+1. **Use `context7` MCP** to resolve library IDs and fetch up-to-date documentation, code examples, and API references
+   - First call `resolve-library-id` to get the correct library ID
+   - Then call `get-library-docs` with the appropriate topic and mode (`code` for API/examples, `info` for conceptual guides)
 
-1. **Context7** (Primary - library documentation)
-   - `mcp__context7__resolve-library-id` - find library ID
-   - `mcp__context7__get-library-docs` - retrieve documentation
+2. **Use `deepwiki` MCP** to explore GitHub repositories for understanding project architecture, implementation details, and best practices
+   - Use `read_wiki_structure` to get documentation topics
+   - Use `read_wiki_contents` for detailed documentation
+   - Use `ask_question` for specific queries about a repository
 
-2. **Web Search** (Antigravity built-in tools)
-   - `search_web` - search for latest news, blog posts, releases, solutions
-   - `read_url_content` - fetch and read content from URLs
+3. **Use `web search`** to find the latest information not covered by MCP tools
+   - Search for recent blog posts, release announcements, and changelogs
+   - Find Stack Overflow solutions and community discussions
+   - Discover real-world usage patterns and edge cases
+   - Verify breaking changes or deprecations in recent versions
 
-3. **DeepWiki** (GitHub repositories)
-   - `mcp__deepwiki__ask_question` - GitHub repo documentation
-   - `mcp__deepwiki__read_wiki_contents` - repo wiki content
+**When to apply this workflow:**
+- Before implementing features using external libraries or frameworks
+- When encountering unfamiliar APIs or patterns
+- When the user mentions specific versions or latest features
+- When best practices or conventions may have evolved
+- When troubleshooting issues that might be version-specific
 
-### Pattern: Subagent for Research
-
-Use the Task tool with a focused prompt to research documentation in isolated context and return only essential findings.
-
-Example for brainstorming:
-```
-Task tool with prompt:
-"Research the best approach for implementing authentication in NestJS using Context7 and web search. Return:
-- Recommended libraries (with latest versions)
-- Current best practices
-- Security considerations
-- Example implementation
-- Comparison of approaches (Passport vs built-in guards)"
-```
-
-Example for implementation:
-```
-Task tool with prompt:
-"Look up NestJS Guards documentation using Context7. Return:
-- How to implement a custom guard
-- Required imports
-- Example code snippet
-- Common pitfalls to avoid"
-```
-
-### Benefits
-
-- **Accuracy**: Current information from authoritative sources
-- **Context efficiency**: Subagent handles verbose exploration
-- **Reliability**: Only distilled, verified results return to main conversation
-- **Safety**: Avoid deprecated or insecure patterns
-</research_with_mcp_tools>
-
----
-
-<parallel_tool_usage>
-## Parallel Tool Execution
-
-When tool calls have no dependencies between them, make all independent calls in parallel to maximize efficiency. For example, when reading multiple files or searching across different sources, execute these simultaneously rather than sequentially.
-
-Reserve sequential execution for operations where one result informs the next.
-</parallel_tool_usage>
-
----
-
-<context_management>
-## Long-Running Tasks
-
-For complex, multi-step tasks:
-- Plan work clearly before starting
-- Save progress and state to memory as context approaches limits
-- Complete tasks fully rather than stopping early due to context concerns
-- Use git commits as checkpoints for code changes
-- Track progress in structured formats (JSON for test results, text for notes)
-</context_management>
-
----
-
-<openkey_analysis>
-## OpenKey Analysis
-
-When analyzing OpenKey code or behavior:
-
-1. **Use both sources in parallel**:
-   - `mcp__deepwiki__ask_question` with repo `tuyenvm/OpenKey` - for high-level architecture and documentation
-   - Local code analysis in `OpenKey/` directory - for implementation details
-
-2. **Combine insights**: Cross-reference DeepWiki explanations with actual source code to ensure accuracy
-
-Example:
-```
-Task tool with prompt:
-"Analyze how OpenKey handles tone placement. Use:
-1. DeepWiki (tuyenvm/OpenKey) for architecture overview
-2. Local OpenKey/ directory for implementation details
-Return the algorithm and key code references."
-```
-</openkey_analysis>
+This ensures responses are accurate, up-to-date, and aligned with current best practices rather than relying on potentially outdated training data.
+</documentation_workflow>
