@@ -150,12 +150,29 @@ public enum VietnameseTable {
         }
     }
 
-    // MARK: - Reverse Lookup
+    /// All tables organized by base character and modifier
+    private static let allTables: [(Character, [(CharacterState, [Character])])] = [
+        ("a", [([], aTable), (.circumflex, aaTable), (.hornOrBreve, awTable)]),
+        ("e", [([], eTable), (.circumflex, eeTable)]),
+        ("i", [([], iTable)]),
+        ("o", [([], oTable), (.circumflex, ooTable), (.hornOrBreve, owTable)]),
+        ("u", [([], uTable), (.hornOrBreve, uwTable)]),
+        ("y", [([], yTable)]),
+        ("d", [(.stroke, dTable), (.hornOrBreve, dTable)]), // đ with stroke or legacy hornOrBreve
+    ]
 
     /// Parse a Vietnamese character back to base + state
+    /// Updated to handle đ/Đ
     public static func parse(_ char: Character) -> (base: Character, state: CharacterState)? {
         let lowercased = char.lowercased().first ?? char
         let isUpper = char.isUppercase
+
+        // Special case for đ/Đ (not in vowel tables)
+        if lowercased == "đ" {
+            var state: CharacterState = .stroke
+            if isUpper { state.insert(.caps) }
+            return ("d", state)
+        }
 
         // Check all tables
         for (baseChar, tables) in allTables {
@@ -190,16 +207,6 @@ public enum VietnameseTable {
             return []
         }
     }
-
-    /// All tables organized by base character and modifier
-    private static let allTables: [(Character, [(CharacterState, [Character])])] = [
-        ("a", [([], aTable), (.circumflex, aaTable), (.hornOrBreve, awTable)]),
-        ("e", [([], eTable), (.circumflex, eeTable)]),
-        ("i", [([], iTable)]),
-        ("o", [([], oTable), (.circumflex, ooTable), (.hornOrBreve, owTable)]),
-        ("u", [([], uTable), (.hornOrBreve, uwTable)]),
-        ("y", [([], yTable)]),
-    ]
 }
 
 // MARK: - TypingBuffer Unicode Extension

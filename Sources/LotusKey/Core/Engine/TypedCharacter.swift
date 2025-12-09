@@ -29,7 +29,16 @@ public struct TypedCharacter: Sendable, Hashable {
     }
 
     /// Create from a Character, auto-detecting capitalization
+    /// For Vietnamese Unicode characters (đ, â, ă, ơ, ư, etc.), automatically decomposes to base + state
     public init(character: Character) {
+        // First try to decompose Vietnamese Unicode characters
+        if let parsed = VietnameseTable.parse(character) {
+            self.baseCode = UInt16(parsed.base.asciiValue ?? 0)
+            self.state = parsed.state
+            return
+        }
+        
+        // Standard ASCII character handling
         let isUpper = character.isUppercase
         let lowercased = character.lowercased().first ?? character
         self.baseCode = UInt16(lowercased.asciiValue ?? 0)

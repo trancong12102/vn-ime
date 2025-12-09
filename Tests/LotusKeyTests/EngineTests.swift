@@ -653,6 +653,20 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(result, "aaaa â", "tempDisableKey should reset after word break, allowing transformation in new word")
     }
 
+    func testCircumflexUndoPreservesPrefix() {
+        // Bug reproduction: "đa" + "aa" should produce "đâ", + "a" should produce "đaa"
+        // NOT lose the "đ" prefix
+        // Scenario: dd → đ, a → đa, a → đâ (circumflex), a → (undo) should give "đaa" NOT "aaa"
+        let result = engine.processString("ddaaaa")
+        XCTAssertEqual(result, "đaaa", "ddaaaa should produce 'đaaa', not 'aaa' - undo should preserve prefix")
+    }
+
+    func testCircumflexUndoPreservesPrefixTra() {
+        // Similar test with "tr" prefix: tr + aa → trâ, + a → traa
+        let result = engine.processString("traaaa")
+        XCTAssertEqual(result, "traaa", "traaaa should produce 'traaa', not 'aaa' - undo should preserve prefix")
+    }
+
     // MARK: - Bracket Key Integration Tests
 
     func testBracketKeyAtStart() {
