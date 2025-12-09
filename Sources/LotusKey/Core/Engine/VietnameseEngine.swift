@@ -72,6 +72,11 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     private var stateHistory: [[TypedCharacter]] = []
     private let maxHistorySize = 10
 
+    /// Track number of space characters typed after finalizing a word.
+    /// Used to restore buffer when backspace removes the space.
+    /// Reference: OpenKey's `_spaceCount` variable.
+    private var spaceCount: Int = 0
+
     /// Input method state for undo tracking
     private var inputMethodState: InputMethodState = InputMethodState()
 
@@ -618,13 +623,34 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
     /// - Backspace ALWAYS passes through to let the system handle deletion
     /// - No text injection during backspace - simple and fast
     private func handleBackspace() -> EngineResult {
-        if buffer.isEmpty {
-            // Buffer already empty - just pass through
-            // Do NOT restore from history here - that would create buffer/screen mismatch
-            // History restoration is only for explicit "undo" action (Ctrl+Z), not backspace
+        // Case 1: Previous character was a space (word break)
+        // Like OpenKey: when backspace removes space, restore the word buffer
+        // so user can continue editing (e.g., "đa " → backspace → "đa" and 'f' → "đà")
+        if spaceCount > 0 {
+            spaceCount -= 1
+            if spaceCount == 0 {
+                // Last space removed - restore the previous word buffer
+                // This allows tone marks to be applied to the restored word
+                _ = restoreFromHistory()
+                previousOutputLength = buffer.toUnicodeString().count
+                inputMethodState.reset()
+                tempDisableTransformation = false
+            }
             return .passThrough
         }
 
+        // Case 2: Buffer is empty and no spaces - try to restore from history
+        // This handles the case where buffer was cleared but we're still in the same "line"
+        if buffer.isEmpty {
+            if restoreFromHistory() {
+                previousOutputLength = buffer.toUnicodeString().count
+                inputMethodState.reset()
+                tempDisableTransformation = false
+            }
+            return .passThrough
+        }
+
+        // Case 3: Normal backspace within a word
         // Save current state before removing (for potential undo via Ctrl+Z)
         saveToHistory()
 
@@ -635,7 +661,8 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
         previousOutputLength = max(0, previousOutputLength - 1)
 
         if buffer.isEmpty {
-            // Buffer is now empty - reset all state for new word
+            // Buffer is now empty - reset state but DON'T clear history
+            // History is preserved so we can restore if user continues backspacing
             previousOutputLength = 0
             inputMethodState.reset()
             tempDisableTransformation = false
@@ -728,12 +755,23 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
             previousOutputLength = 0
             inputMethodState.reset()
             tempDisableTransformation = false
+            spaceCount = 0
             return restoreResult
         }
 
-        // Save current word to history before clearing
-        if !buffer.isEmpty {
+        // Save current word to history before clearing (for potential restore on backspace)
+        // Only save if buffer has content AND this is the first space after the word
+        if !buffer.isEmpty && spaceCount == 0 {
             saveToHistory()
+        }
+
+        // Track space count for potential buffer restoration on backspace
+        // Like OpenKey: "đa " → spaceCount=1, backspace → restore "đa" buffer
+        if wordBreakChar == " " {
+            spaceCount += 1
+        } else {
+            // Non-space word breaks (punctuation) clear the space count
+            spaceCount = 0
         }
 
         // Finalize current word and start new session
@@ -815,6 +853,7 @@ public final class DefaultVietnameseEngine: VietnameseEngine, @unchecked Sendabl
         inputMethodState.reset()
         tempDisableTransformation = false
         tempOffSpellChecking = false
+        spaceCount = 0
     }
 
     public func setInputMethod(_ method: any InputMethod) {
